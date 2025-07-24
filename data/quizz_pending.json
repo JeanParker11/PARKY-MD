@@ -1,0 +1,64 @@
+[
+  {
+    "id": "q_1751196985524_442",
+    "proposedBy": "Hj",
+    "questions": [
+      {
+        "question": "Hbb",
+        "options": {
+          "a": "Bb",
+          "b": "Vb",
+          "c": "Bb",
+          "d": "Bb"
+        },
+        "answer": "a"
+      }
+    ],
+    "proposedAt": "2025-06-29T11:36:25.524Z",
+    "status": "rejected",
+    "bot": "PARKY-MD",
+    "creator": "Jean Parker",
+    "lastModified": "2025-06-29T11:36:46.570Z",
+    "modifiedBy": "admin_1751196996645",
+    "rejectedBy": "admin_1751358569021",
+    "rejectedAt": "2025-07-01T08:29:37.351Z",
+    "rejectionReason": "Aucune raison spécifiée",
+    "ai": {
+      "library": "@google/genai",
+      "model": "gemini-2.0-flash-exp",
+      "available": true,
+      "apiKeyConfigured": true,
+      "version": "0.3.0"
+    }
+  },
+  {
+    "id": "q_1751358553089_200",
+    "proposedBy": "Jean",
+    "questions": [
+      {
+        "question": "Ghv",
+        "options": {
+          "a": "Jjj",
+          "b": "Uyy",
+          "c": "Uu",
+          "d": "Hh"
+        },
+        "answer": "b"
+      }
+    ],
+    "proposedAt": "2025-07-01T08:29:13.090Z",
+    "status": "rejected",
+    "bot": "ᴘᴀʀᴋʏ-ᴍᴅ",
+    "creator": "𝙹𝚎𝚊𝚗 𝙿𝚊𝚛𝚔𝚎𝚛 🐼",
+    "ai": {
+      "library": "@google/genai",
+      "model": "gemini-2.0-flash-exp",
+      "available": true,
+      "apiKeyConfigured": true,
+      "version": "0.3.0"
+    },
+    "rejectedBy": "admin_1751358569021",
+    "rejectedAt": "2025-07-01T08:29:55.248Z",
+    "rejectionReason": "Aucune raison spécifiée"
+  }
+]

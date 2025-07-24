@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARKY-MD - Bot WhatsApp Intelligent</title>
+    
+    <!-- Meta tags pour SEO et Link Preview -->
+    <meta name="description" content="PARKY-MD - Bot WhatsApp intelligent pour quiz manga/anime avec PARKY AI">
+    <meta name="keywords" content="bot whatsapp, quiz manga, anime, parky ai, parky-md">
+    <meta name="author" content="Jean Parker">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PARKY-MD - Bot WhatsApp Intelligent">
+    <meta property="og:description" content="Plateforme complète pour créer et jouer à des quiz manga/anime. Propulsé par PARKY AI.">
+    <meta property="og:image" content="https://files.catbox.moe/9glxaf.jpeg">
+    <meta property="og:url" content="">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PARKY-MD - Bot WhatsApp Intelligent">
+    <meta name="twitter:description" content="Plateforme complète pour créer et jouer à des quiz manga/anime. Propulsé par PARKY AI.">
+    <meta name="twitter:image" content="https://files.catbox.moe/9glxaf.jpeg">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="https://files.catbox.moe/9glxaf.jpeg" type="image/jpeg">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="https://files.catbox.moe/9glxaf.jpeg" alt="Parky" class="nav-logo">
+                <span class="nav-title">PARKY-MD</span>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="#" class="nav-link active" data-section="home">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+                <a href="#" class="nav-link" data-section="quiz">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Quiz</span>
+                </a>
+                <a href="#" class="nav-link" data-section="assistant">
+                    <i class="fas fa-robot"></i>
+                    <span>Assistant</span>
+                </a>
+                <a href="#" class="nav-link" data-section="pairing">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Pairing</span>
+                </a>
+                <a href="#" class="nav-link" data-section="admin">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin</span>
+                </a>
+            </div>
+            
+            <button class="nav-toggle" id="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Section Accueil -->
+        <section class="section active" id="section-home">
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <i class="fas fa-robot"></i>
+                            <span>Bot WhatsApp Intelligent</span>
+                        </div>
+                        <h1 class="hero-title">
+                            Bienvenue sur <span class="gradient-text">PARKY-MD</span>
+                        </h1>
+                        <p class="hero-description">
+                            La plateforme complète pour créer, gérer et jouer à des quiz manga/anime intelligents. 
+                            Propulsé par PARKY AI pour une expérience unique.
+                        </p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary" data-section="quiz">
+                                <i class="fas fa-play"></i>
+                                Commencer
+                            </button>
+                            <a href="https://wa.me/22898133388" class="btn btn-outline" target="_blank">
+                                <i class="fab fa-whatsapp"></i>
+                                WhatsApp
+                            </a>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="stat">
+                                <div class="stat-number" id="total-questions">-</div>
+                                <div class="stat-label">Questions</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number" id="image-questions">-</div>
+                                <div class="stat-label">Quiz Images</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">∞</div>
+                                <div class="stat-label">Utilisateurs</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="hero-image">
+                            <img src="https://files.catbox.moe/9glxaf.jpeg" alt="Parky Bot">
+                        </div>
+                        <div class="floating-elements">
+                            <div class="floating-card card-1">
+                                <i class="fas fa-brain"></i>
+                                <span>PARKY AI</span>
+                            </div>
+                            <div class="floating-card card-2">
+                                <i class="fas fa-gamepad"></i>
+                                <span>Quiz Interactifs</span>
+                            </div>
+                            <div class="floating-card card-3">
+                                <i class="fas fa-users"></i>
+                                <span>Communauté</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features -->
+                <div class="features">
+                    <h2 class="section-title">Fonctionnalités</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <h3>Créer des Quiz</h3>
+                            <p>Proposez vos propres questions avec validation intelligente par PARKY AI</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <h3>Quiz Images</h3>
+                            <p>Créez des questions basées sur des images manga/anime</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3>Assistant PARKY AI</h3>
+                            <p>PARKY vous aide à créer et vérifier vos quiz intelligemment</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <h3>Pairing Code</h3>
+                            <p>Connectez facilement votre WhatsApp avec un code de pairing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Quiz -->
+        <section class="section" id="section-quiz">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Créer un Quiz</h2>
+                    <p class="section-subtitle">Proposez vos questions pour enrichir la base de données</p>
+                </div>
+                
+                <div class="quiz-tabs">
+                    <button class="tab-btn active" data-tab="text">
+                        <i class="fas fa-font"></i>
+                        Quiz Texte
+                    </button>
+                    <button class="tab-btn" data-tab="image">
+                        <i class="fas fa-image"></i>
+                        Quiz Image
+                    </button>
+                </div>
+                
+                <!-- Quiz Texte -->
+                <div class="tab-content active" id="tab-text">
+                    <div class="card">
+                        <form id="quiz-form">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    Votre nom
+                                </label>
+                                <input type="text" id="proposer-name" class="form-input" placeholder="Entrez votre nom..." required>
+                            </div>
+
+                            <div id="questions-container"></div>
+
+                            <div class="form-actions">
+                                <button type="button" id="add-question-btn" class="btn btn-outline">
+                                    <i class="fas fa-plus"></i>
+                                    Ajouter une question
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Envoyer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Quiz Image -->
+                <div class="tab-content" id="tab-image">
+                    <div class="card">
+                        <form id="quiz-image-form">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    Votre nom
+                                </label>
+                                <input type="text" id="image-proposer-name" class="form-input" placeholder="Entrez votre nom..." required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-link"></i>
+                                    URL de l'image
+                                </label>
+                                <input type="url" id="image-url" class="form-input" placeholder="https://example.com/image.jpg" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-question-circle"></i>
+                                    Question
+                                </label>
+                                <input type="text" id="image-question" class="form-input" placeholder="Quel personnage est montré ?" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-list"></i>
+                                    Options de réponse
+                                </label>
+                                <div class="options-grid">
+                                    <input type="text" id="image-option-a" class="form-input" placeholder="Option A" required>
+                                    <input type="text" id="image-option-b" class="form-input" placeholder="Option B" required>
+                                    <input type="text" id="image-option-c" class="form-input" placeholder="Option C" required>
+                                    <input type="text" id="image-option-d" class="form-input" placeholder="Option D" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-check-circle"></i>
+                                    Réponse correcte
+                                </label>
+                                <select id="image-answer" class="form-select" required>
+                                    <option value="">Sélectionnez la bonne réponse</option>
+                                    <option value="a">A</option>
+                                    <option value="b">B</option>
+                                    <option value="c">C</option>
+                                    <option value="d">D</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-tag"></i>
+                                    Catégorie (optionnel)
+                                </label>
+                                <input type="text" id="image-category" class="form-input" placeholder="Ex: Naruto, One Piece...">
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Envoyer le quiz image
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Assistant -->
+        <section class="section" id="section-assistant">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Assistant PARKY AI</h2>
+                    <p class="section-subtitle">Votre assistant intelligent pour les quiz manga/anime</p>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-info">
+                            <div class="chat-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <h4>PARKY Assistant</h4>
+                                <span class="status online">En ligne</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <p>Salut ! Je suis PARKY, ton assistant IA. Je peux t'aider à créer des quiz, vérifier des réponses, ou répondre à tes questions sur les manga/anime. Comment puis-je t'aider aujourd'hui ?</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" id="parky-input" class="form-input" placeholder="Demande à PARKY de t'aider...">
+                        <button type="button" id="ask-parky-btn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="suggestions">
+                        <h5>Suggestions :</h5>
+                        <div class="suggestions-grid">
+                            <button class="suggestion-btn" data-suggestion="Crée-moi 3 questions sur Naruto niveau difficile">
+                                <i class="fas fa-fire"></i>
+                                Questions Naruto
+                            </button>
+                            <button class="suggestion-btn" data-suggestion="Génère des questions sur One Piece avec les derniers chapitres">
+                                <i class="fas fa-anchor"></i>
+                                One Piece récent
+                            </button>
+                            <button class="suggestion-btn" data-suggestion="Aide-moi à créer des questions sur Dragon Ball Z">
+                                <i class="fas fa-dragon"></i>
+                                Dragon Ball Z
+                            </button>
+                            <button class="suggestion-btn" data-suggestion="Crée des questions image pour Attack on Titan">
+                                <i class="fas fa-image"></i>
+                                Questions images AOT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Pairing -->
+        <section class="section" id="section-pairing">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Connexion WhatsApp</h2>
+                    <p class="section-subtitle">Connectez votre WhatsApp avec un code de pairing</p>
+                </div>
+                
+                <div class="pairing-container">
+                    <div class="card">
+                        <div class="pairing-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        
+                        <h3>Générer un Code de Pairing</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Numéro de téléphone (format international)</label>
+                            <input type="tel" id="phone-number" class="form-input" placeholder="Ex: 22898133388" required>
+                            <small class="form-help">Entrez votre numéro sans le + ni les espaces</small>
+                        </div>
+                        
+                        <button id="generate-pairing-btn" class="btn btn-primary btn-full">
+                            <i class="fas fa-mobile-alt"></i>
+                            Générer le Code
+                        </button>
+                        
+                        <div id="pairing-result" class="pairing-result" style="display:none;">
+                            <div class="pairing-code-display">
+                                <h4>Votre Code de Pairing :</h4>
+                                <div class="pairing-code" id="pairing-code-text">----</div>
+                                <p class="pairing-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    Entrez ce code dans WhatsApp pour connecter votre bot
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h5><i class="fas fa-lightbulb"></i> Comment utiliser :</h5>
+                            <ol>
+                                <li>Entrez votre numéro de téléphone</li>
+                                <li>Cliquez sur "Générer le Code"</li>
+                                <li>Ouvrez WhatsApp sur votre téléphone</li>
+                                <li>Allez dans Appareils connectés > Connecter un appareil</li>
+                                <li>Entrez le code affiché</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Admin -->
+        <section class="section" id="section-admin">
+            <div class="container">
+                <!-- Login Admin -->
+                <div id="admin-login" class="admin-login">
+                    <div class="card">
+                        <div class="admin-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Connexion Administrateur</h3>
+                        
+                        <div class="form-group">
+                            <input type="password" id="admin-password" class="form-input" placeholder="Mot de passe admin">
+                        </div>
+                        
+                        <button id="btn-admin-login" class="btn btn-primary btn-full">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Se connecter
+                        </button>
+                        
+                        <div id="admin-login-error" class="error-message" style="display:none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="error-text"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Admin -->
+                <div id="admin-panel" style="display:none;">
+                    <div class="section-header">
+                        <div class="admin-header">
+                            <div>
+                                <h2 class="section-title">Panel d'Administration</h2>
+                                <p class="section-subtitle">Gérez les quiz en attente de validation</p>
+                            </div>
+                            <button id="btn-admin-logout" class="btn btn-outline">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Déconnexion
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-grid">
+                        <div class="admin-section">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4><i class="fas fa-clock"></i> Quiz Texte en Attente</h4>
+                                </div>
+                                <div class="card-body" id="pending-quizzes">
+                                    <div class="loading">
+                                        <div class="spinner"></div>
+                                        <p>Chargement...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-section">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4><i class="fas fa-image"></i> Quiz Images en Attente</h4>
+                                </div>
+                                <div class="card-body" id="pending-image-quizzes">
+                                    <div class="loading">
+                                        <div class="spinner"></div>
+                                        <p>Chargement...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="https://files.catbox.moe/9glxaf.jpeg" alt="Parky" class="footer-logo">
+                    <h4>PARKY-MD</h4>
+                    <p>Bot WhatsApp intelligent pour les passionnés de manga et anime</p>
+                </div>
+                <div class="footer-links">
+                    <h5>Liens Rapides</h5>
+                    <ul>
+                        <li><a href="#" data-section="home">Accueil</a></li>
+                        <li><a href="#" data-section="quiz">Quiz</a></li>
+                        <li><a href="#" data-section="assistant">Assistant IA</a></li>
+                        <li><a href="#" data-section="pairing">Pairing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h5>Contact</h5>
+                    <p><i class="fas fa-envelope"></i> parjjean@gmail.com</p>
+                    <p><i class="fab fa-viber"></i> +22898133388</p>
+                    <div class="social-links">
+                        <a href="https://wa.me/22898133388" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://github.com/JeanParker11"><i class="fab fa-github"></i></a>
+                        <a href="hhtps://t.me/Jeanparker100"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 PARKY-MD. Créé par Jean Parker 🐼</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="toast-icon fas fa-check-circle"></i>
+            <span class="toast-message" id="toast-message">Message</span>
+        </div>
+        <button class="toast-close" onclick="hideToast()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Quel personnage Est montré ?",
+    "imageUrl": "https://files.catbox.moe/zf89rm.jpeg",
+    "options": {
+      "a": "Le pilier du serpent",
+      "b": "Orochimaru",
+      "c": "Mitsuki",
+      "d": "C'est généré par IA"
+    },
+    "answer": "d",
+    "proposedBy": "Jean Parker",
+    "category": "",
+    "validatedAt": "2025-07-01T09:18:45.158Z",
+    "validatedBy": "admin_1751361519924",
+    "bot": "ᴘᴀʀᴋʏ-ᴍᴅ",
+    "creator": "𝙹𝚎𝚊𝚗 𝙿𝚊𝚛𝚔𝚎𝚛 🐼",
+    "ai": {
+      "library": "@google/genai",
+      "model": "gemini-2.0-flash-exp",
+      "available": true,
+      "apiKeyConfigured": true,
+      "version": "0.3.0"
+    }
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "watch": ["index.js", "commands", "lib", "IA", "web", "telegram"],
+  "ignore": ["session/*", "creds.json", "data/*", "*.log"],
+  "ext": "js,json"
+}
