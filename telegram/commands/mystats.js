@@ -18,9 +18,11 @@ module.exports = {
     const allBots = botManager.getAllBots();
     const userBots = allBots.filter(bot => bot.config.ownerJid === userJid);
 
+    console.log(`📊 Stats debug - User: ${userId}, UserJid: ${userJid}, UserBots: ${userBots.length}`);
     if (userBots.length === 0 && !isGlobalDev) {
       return ctx.reply(
-        "📊 Tu n'as aucun bot connecté.\n\n" +
+        `📊 Tu n'as aucun bot connecté.\n\n` +
+        `🔍 Debug: UserJid=${userJid}, TotalBots=${allBots.length}\n\n` +
         "Utilise /connecter <numéro> pour connecter ton bot WhatsApp."
       );
     }
