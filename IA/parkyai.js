@@ -3,18 +3,19 @@ const path = require('path');
 const { writeExif } = require('../lib/exif');
 const geminiAI = require('../lib/geminiAI');
 const { generateImageFromPrompt } = require('../lib/imageGenerator');
+const userDataManager = require('../lib/userDataManager');
+const botManager = require('../lib/botManager');
 
 function containsEmoji(text) {
   return /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}]/u.test(text);
 }
 
 async function PARKYAI(riza, m, messageType) {
-  const dataDir = path.join(__dirname, "../data");
-  const historyPath = path.join(dataDir, "parky-history.json");
+  // Obtenir la configuration du bot
+  const botConfig = riza.botConfig || getBotConfigFromSocket(riza);
+  const botId = botConfig?.botId || 'default';
+  
   const stickersDir = path.join(__dirname, "../assets/stickers");
-
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
-  if (!fs.existsSync(historyPath)) fs.writeFileSync(historyPath, JSON.stringify({}));
 
   const isGroup = m.chat.endsWith("@g.us");
   const isNewsletter = m.chat.endsWith("@newsletter");
@@ -34,7 +35,10 @@ async function PARKYAI(riza, m, messageType) {
   const fromJid = m.chat;
   if (!fromJid.endsWith('@s.whatsapp.net') && !fromJid.endsWith('@g.us') && !fromJid.endsWith('@newsletter')) return;
 
-  const botLidRaw = riza.user?.lid || "";
+  // Vérifier si PARKY AI est activé pour ce bot
+  if (botConfig && !botConfig.ai.PARKYAI) return;
+
+  const botLidRaw = riza.user?.lid || riza.user?.id || "";
   if (!botLidRaw) return;
   const botLidSimple = botLidRaw.split("@")[0].split(":")[0] + "@lid";
 
@@ -85,17 +89,25 @@ async function PARKYAI(riza, m, messageType) {
   const isImpostor = impostorPatterns.some(re => re.test(lowerText));
 
   if (isImpostor) {
-    const warningMsg = `⚠️ Désolé ${senderName}, seul Jean Parker est mon créateur légitime. Merci de ne pas usurper son identité 🙏.`;
+    const creatorName = botConfig?.creatorName || "Jean Parker";
+    const warningMsg = `⚠️ Désolé ${senderName}, seul ${creatorName} est mon créateur légitime. Merci de ne pas usurper son identité 🙏.`;
     await riza.sendMessage(m.chat, { text: warningMsg }, { quoted: m });
     return;
   }
 
-  const prefix = global.prefix || '+';
+  const prefix = botConfig?.prefix || global.prefix || '+';
   if (text.trim().startsWith(prefix)) return;
 
-  const isOwner = Array.isArray(global.owner)
-    ? global.owner.includes(senderLid) || global.owner.includes(senderSw) || global.owner.includes(senderBase)
-    : [senderLid, senderSw, senderBase].includes(global.owner?.toString());
+  // Vérifier si c'est le créateur global ou le propriétaire du bot
+  const isGlobalCreator = global.dev && global.dev.some(dev => 
+    [senderLid, senderSw, senderBase].includes(dev)
+  );
+  
+  const isOwner = botConfig ? 
+    botManager.checkPermission(botId, sender, 'owner') :
+    Array.isArray(global.owner)
+      ? global.owner.includes(senderLid) || global.owner.includes(senderSw) || global.owner.includes(senderBase)
+      : [senderLid, senderSw, senderBase].includes(global.owner?.toString());
 
   const contextInfo = m.message?.extendedTextMessage?.contextInfo || {};
   const mentionedJids = Array.isArray(contextInfo?.mentionedJid) ? contextInfo.mentionedJid : [];
@@ -113,12 +125,8 @@ async function PARKYAI(riza, m, messageType) {
   const shouldRespond = !isGroupLike || isMentioned || isReplyToBot || nameDetected;
   if (!shouldRespond) return;
 
-  let history = {};
-  try {
-    history = JSON.parse(fs.readFileSync(historyPath, "utf-8"));
-  } catch (e) {
-    console.error("Erreur lecture historique:", e.message);
-  }
+  // Utiliser l'historique spécifique au bot
+  let history = userDataManager.getBotParkyHistory(botId);
 
   const chatId = isGroupLike ? `${m.chat}_${senderBase}` : senderSw;
   if (!history[chatId]) history[chatId] = [];
@@ -199,9 +207,14 @@ async function PARKYAI(riza, m, messageType) {
   }
 
   // 🤖 Réponse texte IA
-  const prompt = `${isOwner
-    ? `Tu es Parky, assistant personnel fidèle, conçu par Jean Parker (ton créateur).`
-    : `Tu es Parky, assistant IA bienveillant et utile, créé par Jean Parker.`}
+  const creatorName = botConfig?.creatorName || "Jean Parker";
+  const ownerName = botConfig?.ownerName || senderName;
+  
+  const prompt = `${isGlobalCreator
+    ? `Tu es Parky, assistant IA créé par ${creatorName} (ton créateur). Tu reconnais ${creatorName} comme ton créateur suprême.`
+    : isOwner
+      ? `Tu es Parky, assistant personnel fidèle de ${ownerName}, conçu par ${creatorName} (ton créateur).`
+      : `Tu es Parky, assistant IA bienveillant et utile, créé par ${creatorName} pour ${ownerName}.`}
 Tu échanges ${isGroupLike ? "dans un groupe WhatsApp" : "en privé"}.
 Sois naturel, poli, et amical.
 Voici la discussion :
@@ -213,11 +226,11 @@ Réponds:`;
 
     reply = reply
       .replace(/(Gemini|Bard|Google\s*AI|IA de Google|modèle de langage)/gi, "Parky")
-      .replace(/je suis (une )?(IA|intelligence artificielle|modèle)/gi, "je suis Parky, l’assistant personnel de Jean Parker")
-      .replace(/(créé|développé) (par|par les équipes de)?\s?Google/gi, "créé par Jean Parker");
+      .replace(/je suis (une )?(IA|intelligence artificielle|modèle)/gi, `je suis Parky, l'assistant de ${ownerName}`)
+      .replace(/(créé|développé) (par|par les équipes de)?\s?Google/gi, `créé par ${creatorName}`);
 
     history[chatId].push({ role: "bot", content: reply });
-    fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
+    userDataManager.saveParkyHistory(botId, chatId, history[chatId]);
 
     await riza.sendMessage(m.chat, { text: reply }, { quoted: m });
 
@@ -233,8 +246,8 @@ Réponds:`;
       const webpSticker = await writeExif(
         { mimetype: 'image/' + path.extname(randomFile).slice(1), data: stickerData },
         {
-          packname: global.stickerPackName || "PARKY-MD",
-          author: global.stickerAuthor || "Jean Parker 🐼",
+          packname: botConfig?.stickerPackName || global.stickerPackName || "PARKY-MD",
+          author: botConfig?.stickerAuthor || global.stickerAuthor || "Jean Parker 🐼",
           categories: ["🤖"]
         }
       );
@@ -247,6 +260,13 @@ Réponds:`;
       text: `Erreur avec Gemini AI (${geminiAI.model})\nRéessaie plus tard !\n\n*Erreur:* ${err.message}`
     }, { quoted: m });
   }
+}
+
+// Fonction pour obtenir la config du bot depuis le socket
+function getBotConfigFromSocket(sock) {
+  if (sock.botConfig) return sock.botConfig;
+  if (sock.botId) return botManager.getBotConfig(sock.botId);
+  return null;
 }
 
 module.exports = { PARKYAI };

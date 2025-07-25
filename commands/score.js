@@ -1,12 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const userDataManager = require("../lib/userDataManager");
+const botManager = require("../lib/botManager");
 
-const usersPath = path.join(__dirname, "../data/users.json");
-
-function loadUsers() {
-  if (!fs.existsSync(usersPath)) return {};
-  return JSON.parse(fs.readFileSync(usersPath));
-}
 
 // 🔧 Fonction pour corriger les jid @lid
 function normalizeJid(jidOrObj) {
@@ -27,9 +23,13 @@ module.exports = {
   onlyAdmin: false,
 
   async execute(riza, m, args) {
+    // Obtenir la configuration du bot
+    const botConfig = riza.botConfig || getBotConfigFromSocket(riza);
+    const botId = botConfig?.botId || 'default';
+    
     const from = m.chat;
     const sender = normalizeJid(m.sender);
-    const users = loadUsers();
+    const users = userDataManager.getBotScores(botId);
 
     // -- Top classement
     if (args[0] === "top") {
@@ -75,3 +75,9 @@ module.exports = {
     }, { quoted: m });
   },
 };
+// Fonction pour obtenir la config du bot depuis le socket
+function getBotConfigFromSocket(sock) {
+  if (sock.botConfig) return sock.botConfig;
+  if (sock.botId) return botManager.getBotConfig(sock.botId);
+  return null;
+}

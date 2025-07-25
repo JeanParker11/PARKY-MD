@@ -1,26 +1,17 @@
 const fs = require("fs");
 const path = require("path");
+const userDataManager = require("../lib/userDataManager");
+const botManager = require("../lib/botManager");
 
-const quizPath = path.join(__dirname, "../data/quizz.json");
-const scoresPath = path.join(__dirname, "../data/battle.json");
-const rewardsPath = path.join(__dirname, "../data/recompense.json");
 
 const waitingBattles = new Map();
 const ongoingBattles = new Map();
 
-const loadQuiz = () => JSON.parse(fs.readFileSync(quizPath));
-const loadScores = () => {
-  if (!fs.existsSync(scoresPath)) fs.writeFileSync(scoresPath, "{}");
-  return JSON.parse(fs.readFileSync(scoresPath));
+// Chargement des données globales (partagées)
+const loadQuiz = () => {
+  const quizPath = path.join(__dirname, "../data/quizz.json");
+  return JSON.parse(fs.readFileSync(quizPath));
 };
-const saveScores = (scores) =>
-  fs.writeFileSync(scoresPath, JSON.stringify(scores, null, 2));
-const loadRewards = () => {
-  if (!fs.existsSync(rewardsPath)) fs.writeFileSync(rewardsPath, "[]");
-  return JSON.parse(fs.readFileSync(rewardsPath));
-};
-const saveRewards = (rewards) =>
-  fs.writeFileSync(rewardsPath, JSON.stringify(rewards, null, 2));
 
 function formatQuestion(q, joueur, numero, total) {
   const keys = Object.keys(q.options);
@@ -36,6 +27,10 @@ module.exports = {
   category: "JEUX",
   allowedForAll: true,
   async execute(riza, m) {
+    // Obtenir la configuration du bot
+    const botConfig = riza.botConfig || getBotConfigFromSocket(riza);
+    const botId = botConfig?.botId || 'default';
+    
     const from = m.chat;
     const sender = m.sender;
 
@@ -145,7 +140,7 @@ module.exports = {
       await sleep(1000);
     }
 
-    const scoresData = loadScores();
+    const scoresData = userDataManager.getBotBattles(botId);
     [challenger, opponent].forEach((jid) => {
       if (!scoresData[jid]) scoresData[jid] = { victories: 0 };
     });
@@ -156,13 +151,14 @@ module.exports = {
     let winnerJid = null;
     if (scoreChallenger > scoreOpponent) {
       scoresData[challenger].victories++;
+      userDataManager.updateBattleVictory(botId, challenger);
       winnerJid = challenger;
     } else if (scoreOpponent > scoreChallenger) {
       scoresData[opponent].victories++;
+      userDataManager.updateBattleVictory(botId, opponent);
       winnerJid = opponent;
     }
 
-    saveScores(scoresData);
 
     let result = `🏁 *Résultat du Duel*\n\n`;
     result += `@${challenger.split("@")[0]} : ${scoreChallenger} pts\n`;
@@ -170,7 +166,7 @@ module.exports = {
 
     if (winnerJid) {
       result += `🥇 Victoire de @${winnerJid.split("@")[0]} !\n`;
-      const gotReward = await sendReward(riza, winnerJid, from);
+      const gotReward = await sendReward(riza, winnerJid, from, botId);
       if (gotReward) {
         result += `🎉 @${winnerJid.split("@")[0]} a reçu une récompense en privé !`;
       }
@@ -188,9 +184,9 @@ module.exports = {
   },
 };
 
-async function sendReward(riza, winnerJid, groupJid) {
-  const scoresData = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/battle.json")));
-  const rewards = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/recompense.json")));
+async function sendReward(riza, winnerJid, groupJid, botId) {
+  const scoresData = userDataManager.getBotBattles(botId);
+  const rewards = userDataManager.getBotRewards(botId);
 
   const victories = scoresData[winnerJid]?.victories || 0;
 
@@ -226,11 +222,16 @@ Amuse-toi bien sur *${reward.service}* !`;
     console.log(`[Battle] Récompense envoyée à ${winnerJid} pour ${victories} victoires.`);
 
     // Supprimer la récompense utilisée et sauvegarder
-    rewards.splice(rewardIndex, 1);
-    fs.writeFileSync(path.join(__dirname, "../data/recompense.json"), JSON.stringify(rewards, null, 2));
+    userDataManager.removeBotReward(botId, rewardIndex);
 
     return true;
   }
 
   return false;
+}
+// Fonction pour obtenir la config du bot depuis le socket
+function getBotConfigFromSocket(sock) {
+  if (sock.botConfig) return sock.botConfig;
+  if (sock.botId) return botManager.getBotConfig(sock.botId);
+  return null;
 }
