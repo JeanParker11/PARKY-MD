@@ -62,30 +62,12 @@ function setupHandlers(bot, options = {}) {
           }
         });
 
-        // Gestion des callbacks pour les commandes qui en ont
-        if (typeof command.handleCallback === "function") {
-          bot.on("callback_query", async (ctx) => {
-            try {
-              await command.handleCallback(ctx);
-            } catch (err) {
-              console.error(`❌ Erreur callback ${command.name}:`, err);
-            }
-          });
-        }
-
-        // Si la commande gère aussi les `callback_query` (ex: boutons)
-        if (typeof command.callbackQuery === "function") {
-          bot.on("callback_query", async (ctx) => {
-            try {
-              await command.callbackQuery(ctx);
-            } catch (err) {
-              console.error("❌ Erreur callback_query :", err);
-            }
-          });
-        }
+        console.log(`✅ Commande Telegram enregistrée : /${command.name}`);
       }
     }
   });
+  
+  console.log(`📚 ${registeredCommands.length} commande(s) Telegram chargée(s)`);
 }
 
 module.exports = {

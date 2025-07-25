@@ -48,11 +48,18 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('BOTINFO_') && !data.startsWith('CONFIG_BOT_') && !data.startsWith('DISCONNECT_') && !data.startsWith('CLEAN_CONFIRM_')) {
+      return false;
+    }
+    
     if (data.startsWith('BOTINFO_')) {
       const botId = data.replace('BOTINFO_', '');
       await showBotInfo(ctx, botId);
-      return ctx.answerCbQuery();
+      return true;
     }
+    
+    return false;
   }
 };
 

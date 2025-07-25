@@ -70,12 +70,18 @@ module.exports = {
     const userId = ctx.from.id.toString();
     const userJid = `${userId}@s.whatsapp.net`;
     
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('CLEAN_')) {
+      return false;
+    }
+    
     const isGlobalDev = global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
     );
 
     if (!isGlobalDev) {
-      return ctx.answerCbQuery("⛔ Accès refusé", { show_alert: true });
+      await ctx.answerCbQuery("⛔ Accès refusé", { show_alert: true });
+      return true;
     }
 
     if (data.startsWith('CLEAN_CONFIRM_')) {
@@ -106,6 +112,6 @@ module.exports = {
       await ctx.editMessageText("❌ Suppression annulée.");
     }
 
-    return ctx.answerCbQuery();
+    return true;
   }
 };

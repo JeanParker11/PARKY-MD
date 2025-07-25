@@ -1,8 +1,6 @@
 // 🟩 Initialisation
 require('./lib/watcher');
 require('./settings');
-require('./web/server');
-require('./telegram/index');
 
 const fs = require('fs');
 const path = require('path');
@@ -73,6 +71,13 @@ async function main() {
             logInfo("✅ La connexion principale du bot a été établie ou tentée.");
         }
 
+        // 3. Démarrer le serveur web
+        require('./web/server');
+        logInfo("🌐 Serveur web démarré");
+
+        // 4. Démarrer le bot Telegram
+        require('./telegram/index');
+        logInfo("📱 Bot Telegram démarré");
 
         // Pour l'exemple, nous allons itérer sur toutes les sessions actives gérées par `connecter.js`
         // et appliquer la logique de gestion des messages et événements à chacune.

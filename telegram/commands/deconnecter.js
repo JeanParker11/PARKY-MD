@@ -65,6 +65,11 @@ module.exports = {
     const userId = ctx.from.id.toString();
     const userJid = `${userId}@s.whatsapp.net`;
     
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('DISCONNECT_')) {
+      return false;
+    }
+    
     const isGlobalDev = global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
     );
@@ -80,18 +85,22 @@ module.exports = {
         // Vérifier les permissions pour ce bot spécifique
         const bot = botManager.getBot(botId);
         if (!bot) {
-          return ctx.answerCbQuery("❌ Bot introuvable", { show_alert: true });
+          await ctx.answerCbQuery("❌ Bot introuvable", { show_alert: true });
+          return true;
         }
 
         if (!isGlobalDev && bot.config.ownerJid !== userJid) {
-          return ctx.answerCbQuery("⛔ Tu ne peux déconnecter que tes propres bots", { show_alert: true });
+          await ctx.answerCbQuery("⛔ Tu ne peux déconnecter que tes propres bots", { show_alert: true });
+          return true;
         }
 
         await disconnectBot(ctx, botId, isGlobalDev);
       }
       
-      return ctx.answerCbQuery();
+      return true;
     }
+    
+    return false;
   }
 };
 

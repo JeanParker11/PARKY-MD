@@ -28,6 +28,21 @@ bot.on("callback_query", async (ctx) => {
   
     console.log("➡️ Bouton cliqué :", data);  
   
+    // Gestion des boutons de commandes spécifiques
+    const commands = getAllCommands();
+    for (const command of commands) {
+      if (typeof command.handleCallback === "function") {
+        try {
+          const handled = await command.handleCallback(ctx);
+          if (handled) {
+            return await ctx.answerCbQuery("✅ Exécuté !");
+          }
+        } catch (e) {
+          console.error(`❌ Erreur callback ${command.name}:`, e);
+        }
+      }
+    }
+
     if (data.startsWith("CMD_")) {  
       const cmdName = data.replace("CMD_", "");  
       const command = getAllCommands().find(c => c.name === cmdName);  
@@ -46,6 +61,56 @@ bot.on("callback_query", async (ctx) => {
       return await handleHelpButtonCallback(ctx);  
     }  
   
+    // Gestion des boutons globaux
+    if (data.startsWith("GLOBAL_")) {
+      const globalConfigCommand = getAllCommands().find(c => c.name === "globalconfig");
+      if (globalConfigCommand && typeof globalConfigCommand.handleCallback === "function") {
+        await globalConfigCommand.handleCallback(ctx);
+        return await ctx.answerCbQuery();
+      }
+    }
+
+    // Gestion des boutons de configuration bot
+    if (data.startsWith("CONFIG_") || data.startsWith("PARKY_") || data.startsWith("BOTINFO_")) {
+      const configCommands = ["configbot", "parkyconfig", "botinfo"];
+      for (const cmdName of configCommands) {
+        const command = getAllCommands().find(c => c.name === cmdName);
+        if (command && typeof command.handleCallback === "function") {
+          try {
+            await command.handleCallback(ctx);
+            return await ctx.answerCbQuery();
+          } catch (e) {
+            console.error(`❌ Erreur callback ${cmdName}:`, e);
+          }
+        }
+      }
+    }
+
+    // Gestion des boutons de déconnexion et nettoyage
+    if (data.startsWith("DISCONNECT_") || data.startsWith("CLEAN_")) {
+      const disconnectCommands = ["deconnecter", "cleandata"];
+      for (const cmdName of disconnectCommands) {
+        const command = getAllCommands().find(c => c.name === cmdName);
+        if (command && typeof command.handleCallback === "function") {
+          try {
+            await command.handleCallback(ctx);
+            return await ctx.answerCbQuery();
+          } catch (e) {
+            console.error(`❌ Erreur callback ${cmdName}:`, e);
+          }
+        }
+      }
+    }
+
+    // Gestion des boutons de statistiques
+    if (data.startsWith("MY_STATS_") || data.startsWith("MY_BOTS_")) {
+      const statsCommand = getAllCommands().find(c => c.name === "mystats");
+      if (statsCommand && typeof statsCommand.handleCallback === "function") {
+        await statsCommand.handleCallback(ctx);
+        return await ctx.answerCbQuery();
+      }
+    }
+
     return await ctx.answerCbQuery("❔ Bouton non reconnu.", { show_alert: true });  
   
   } catch (error) {  
@@ -73,7 +138,10 @@ bot.on("text", async (ctx) => {
   
 // Lancement du bot  
 bot.launch()  
-  .then(() => console.log("✅ Bot Telegram lancé avec succès"))  
+  .then(() => {
+    console.log("✅ Bot Telegram lancé avec succès");
+    console.log(`📱 Bot Telegram @${bot.botInfo?.username || 'inconnu'} est maintenant en ligne`);
+  })
   .catch(err => console.error("❌ Erreur lancement bot :", err));  
   
 // Surveillance des changements  
@@ -89,4 +157,3 @@ chokidar.watch(dataPath, { ignoreInitial: true }).on("all", async (event, filePa
   
 // Arrêt propre  
 process.once("SIGINT", () => bot.stop("SIGINT"));  
-process.once("SIGTERM", () => bot.stop("SIGTERM"));

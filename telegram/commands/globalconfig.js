@@ -61,13 +61,19 @@ module.exports = {
     const userId = ctx.from.id.toString();
     const userJid = `${userId}@s.whatsapp.net`;
 
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('GLOBAL_')) {
+      return false;
+    }
+
     // Vérifier les permissions dev
     const isGlobalDev = global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
     );
 
     if (!isGlobalDev) {
-      return ctx.answerCbQuery("⛔ Accès refusé", { show_alert: true });
+      await ctx.answerCbQuery("⛔ Accès refusé", { show_alert: true });
+      return true;
     }
 
     switch (data) {
@@ -94,9 +100,22 @@ module.exports = {
       case 'GLOBAL_CLEANUP':
         await cleanupInactiveBots(ctx);
         break;
+      
+      case 'GLOBAL_BACK':
+        await this.execute(ctx);
+        break;
+      
+      default:
+        // Gestion des boutons de configuration globale IA
+        if (data.startsWith('GLOBAL_AI_')) {
+          await handleGlobalAIToggle(ctx, data);
+        } else if (data.startsWith('GLOBAL_CMD_')) {
+          await handleGlobalCommandToggle(ctx, data);
+        }
+        break;
     }
 
-    return ctx.answerCbQuery();
+    return true;
   }
 };
 

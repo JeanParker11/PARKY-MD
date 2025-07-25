@@ -111,6 +111,11 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('MY_STATS_') && !data.startsWith('MY_BOTS_')) {
+      return false;
+    }
+    
     switch (data) {
       case 'MY_STATS_REFRESH':
         await this.execute(ctx);
@@ -125,7 +130,7 @@ module.exports = {
         break;
     }
 
-    return ctx.answerCbQuery();
+    return true;
   }
 };
 

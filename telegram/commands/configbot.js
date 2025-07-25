@@ -48,23 +48,30 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     
+    // Vérifier que ce callback nous concerne
+    if (!data.startsWith('CONFIG_BOT_') && !data.startsWith('TOGGLE_') && !data.startsWith('EDIT_')) {
+      return false;
+    }
+    
     if (data.startsWith('CONFIG_BOT_')) {
       const botId = data.replace('CONFIG_BOT_', '');
       await showBotConfig(ctx, botId);
-      return ctx.answerCbQuery();
+      return true;
     }
 
     if (data.startsWith('TOGGLE_')) {
       const [, botId, category, setting] = data.split('_');
       await toggleSetting(ctx, botId, category, setting);
-      return ctx.answerCbQuery("✅ Paramètre modifié");
+      return true;
     }
 
     if (data.startsWith('EDIT_')) {
       const [, botId, field] = data.split('_');
       await editField(ctx, botId, field);
-      return ctx.answerCbQuery();
+      return true;
     }
+    
+    return false;
   }
 };
 
