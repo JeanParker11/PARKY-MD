@@ -30,9 +30,30 @@ module.exports = {
         }
 
         if (getSession(number)) {
-            return ctx.reply(`ℹ️ Le numéro ${number} est déjà connecté.`, { parse_mode: "Markdown" });
+            // Vérifier si c'est le bot de cet utilisateur
+            const userId = ctx.from.id.toString();
+            const userJid = `${userId}@s.whatsapp.net`;
+            const existingBot = botManager.getAllBots().find(bot => bot.botId === number);
+            
+            if (existingBot && existingBot.config.ownerJid === userJid) {
+                return ctx.reply(`✅ Ton bot ${number} est déjà connecté.`, { parse_mode: "Markdown" });
+            } else if (existingBot) {
+                return ctx.reply(`❌ Ce numéro ${number} est déjà utilisé par un autre utilisateur.`, { parse_mode: "Markdown" });
+            }
         }
 
+        // Vérifier si l'utilisateur a déjà un bot connecté
+        const userId = ctx.from.id.toString();
+        const userJid = `${userId}@s.whatsapp.net`;
+        const userExistingBot = botManager.getAllBots().find(bot => bot.config.ownerJid === userJid);
+        
+        if (userExistingBot) {
+            return ctx.reply(
+                `❌ Tu as déjà un bot connecté (${userExistingBot.botId}).\n\n` +
+                `Utilise /deconnecter pour le déconnecter d'abord, puis reconnecte-toi.`,
+                { parse_mode: "Markdown" }
+            );
+        }
         await startSession(number, ctx);
     }
 };

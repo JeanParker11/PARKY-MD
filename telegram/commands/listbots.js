@@ -17,16 +17,22 @@ module.exports = {
 
     const allBots = botManager.getAllBots();
     
+    console.log(`🔍 Debug listbots - Utilisateur: ${userId}, Total bots: ${allBots.length}`);
+    allBots.forEach(bot => {
+      console.log(`   Bot: ${bot.botId}, Owner: ${bot.config.ownerJid}, Status: ${bot.sock ? 'online' : 'offline'}`);
+    });
+    
     // Filtrer les bots selon les permissions
     const visibleBots = isGlobalDev ? 
       allBots : 
       allBots.filter(bot => bot.config.ownerJid === userJid);
 
+    console.log(`🔍 Bots visibles pour ${userId}: ${visibleBots.length}`);
     if (visibleBots.length === 0) {
       return ctx.reply(
         isGlobalDev ? 
           "📱 Aucun bot connecté actuellement." :
-          "📱 Tu n'as aucun bot connecté.\n\nUtilise /connecter <numéro> pour connecter ton bot."
+          `📱 Tu n'as aucun bot connecté.\n\nUtilise /connecter <numéro> pour connecter ton bot.\n\n🔍 Debug: UserJid=${userJid}, TotalBots=${allBots.length}`
       );
     }
 

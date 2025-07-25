@@ -99,12 +99,14 @@ async function startSession(targetNumber, ctx) {
                 console.log(`✅ Session connectée pour ${targetNumber}`);
                 
                 // Enregistrer le bot dans le manager avec configuration individuelle
-                const ownerJid = `${targetNumber}@s.whatsapp.net`;
+                const ownerJid = ctx ? `${ctx.from.id}@s.whatsapp.net` : `${targetNumber}@s.whatsapp.net`;
                 const config = botManager.registerBot(targetNumber, sock, ownerJid);
                 
                 // Appliquer la configuration au socket
                 sock.botConfig = config;
                 sock.botId = targetNumber;
+                
+                console.log(`🤖 Bot ${targetNumber} enregistré pour l'utilisateur ${ownerJid}`);
                 
                 if (ctx) await simpleSender(ctx, `✅ ${targetNumber} connecté avec succès à WhatsApp !`);
             }

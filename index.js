@@ -103,6 +103,19 @@ async function main() {
             sock.contacts = sock.contacts || {};
             sock.groupMetadata = sock.groupMetadata || {};
 
+            // Enregistrer le bot dans le gestionnaire si pas déjà fait
+            if (sock.user && sock.user.id) {
+                const botId = sock.user.id.split('@')[0].split(':')[0];
+                const ownerJid = sock.user.id;
+                
+                // Vérifier si le bot n'est pas déjà enregistré
+                if (!botManager.getBot(botId)) {
+                    console.log(`📱 Enregistrement du bot ${botId} dans le gestionnaire`);
+                    const config = botManager.registerBot(botId, sock, ownerJid);
+                    sock.botConfig = config;
+                    sock.botId = botId;
+                }
+            }
             sock.ev.on("contacts.update", updates => {
                 try {
                     for (let update of updates) {
