@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const botManager = require('../lib/botManager');
 
 const iaFolder = __dirname;
 const IAHandlers = [];
@@ -41,7 +42,11 @@ fs.readdirSync(iaFolder)
  * @param {*} m - message reçu
  */
 module.exports = async function handleAllIA(conn, m) {
-  if (!global.parametres || typeof global.parametres !== 'object') {
+  // Obtenir la configuration du bot spécifique
+  const botConfig = conn.botConfig || getBotConfigFromSocket(conn);
+  const parametres = botConfig?.ai || global.parametres;
+  
+  if (!parametres || typeof parametres !== 'object') {
     console.warn("⚠️ global.parametres non défini ou invalide");
     return;
   }
@@ -49,7 +54,7 @@ module.exports = async function handleAllIA(conn, m) {
   const messageType = getMessageType(m);
 
   for (const { name, fn } of IAHandlers) {
-    if (!global.parametres[name]) continue;
+    if (!parametres[name]) continue;
 
     try {
       // On passe l'instance, le message, et le type de message
@@ -59,3 +64,10 @@ module.exports = async function handleAllIA(conn, m) {
     }
   }
 };
+
+// Fonction pour obtenir la config du bot depuis le socket
+function getBotConfigFromSocket(sock) {
+  if (sock.botConfig) return sock.botConfig;
+  if (sock.botId) return botManager.getBotConfig(sock.botId);
+  return null;
+}

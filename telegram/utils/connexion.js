@@ -3,6 +3,7 @@
 const { makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const path = require("path");
+const botManager = require("../../lib/botManager");
 
 const SESSIONS_FILE = "./sessions.json";
 const sessions = {};
@@ -88,6 +89,7 @@ async function startSession(targetNumber, ctx) {
                     await startSession(targetNumber, ctx);
                 } else {
                     console.log(`❌ Déconnecté. Suppression session ${targetNumber}`);
+                    botManager.removeBot(targetNumber);
                     removeSession(targetNumber);
                     if (ctx) await simpleSender(ctx, `❌ Session ${targetNumber} déconnectée.`);
                 }
@@ -95,6 +97,15 @@ async function startSession(targetNumber, ctx) {
 
             if (connection === "open") {
                 console.log(`✅ Session connectée pour ${targetNumber}`);
+                
+                // Enregistrer le bot dans le manager avec configuration individuelle
+                const ownerJid = `${targetNumber}@s.whatsapp.net`;
+                const config = botManager.registerBot(targetNumber, sock, ownerJid);
+                
+                // Appliquer la configuration au socket
+                sock.botConfig = config;
+                sock.botId = targetNumber;
+                
                 if (ctx) await simpleSender(ctx, `✅ ${targetNumber} connecté avec succès à WhatsApp !`);
             }
         });

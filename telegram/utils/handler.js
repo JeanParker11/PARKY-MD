@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const botManager = require("../../lib/botManager");
 
 // Liste des commandes enregistrées
 const registeredCommands = [];
@@ -60,6 +61,17 @@ function setupHandlers(bot, options = {}) {
             await ctx.reply("❌ Une erreur est survenue pendant l'exécution.");
           }
         });
+
+        // Gestion des callbacks pour les commandes qui en ont
+        if (typeof command.handleCallback === "function") {
+          bot.on("callback_query", async (ctx) => {
+            try {
+              await command.handleCallback(ctx);
+            } catch (err) {
+              console.error(`❌ Erreur callback ${command.name}:`, err);
+            }
+          });
+        }
 
         // Si la commande gère aussi les `callback_query` (ex: boutons)
         if (typeof command.callbackQuery === "function") {

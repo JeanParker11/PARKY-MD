@@ -5,6 +5,7 @@ const chalk = require('chalk');
 // 📌 Infos globales
 global.owner = ["237693686208", "15483994640452@lid"];
 global.sudo = ["22898133388"];
+global.dev = ["237693686208", "22898133388"]; // Global dev - droits sur tous les bots
 global.ownername = '𝙹𝚎𝚊𝚗 𝙿𝚊𝚛𝚔𝚎𝚛 🐼';
 global.botname = '𝙿𝙰𝚁𝙺𝚈-𝙼𝙳';
 global.botversion = '1.0.0';
