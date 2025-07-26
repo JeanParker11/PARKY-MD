@@ -4,6 +4,7 @@ const { makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whis
 const fs = require("fs");
 const path = require("path");
 const botManager = require("../../lib/botManager");
+const messageMonitor = require("../../lib/messageMonitor");
 
 const SESSIONS_FILE = "./sessions.json";
 const sessions = {};
@@ -105,6 +106,14 @@ async function startSession(targetNumber, ctx) {
                 // Appliquer la configuration au socket
                 sock.botConfig = config;
                 sock.botId = targetNumber;
+                
+                // Enregistrer dans le monitoring
+                messageMonitor.registerBot(targetNumber, config.botname, ownerJid);
+                
+                // Configurer les événements pour ce bot
+                if (global.setupBotEvents) {
+                    global.setupBotEvents(sock);
+                }
                 
                 console.log(`🤖 Bot ${targetNumber} enregistré pour l'utilisateur ${ownerJid}`);
                 

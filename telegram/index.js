@@ -5,6 +5,7 @@ const chokidar = require("chokidar");
 const { setupHandlers, getAllCommands } = require("./utils/handler");  
 const zipAndSend = require("./utils/zipAndSend");  
 const handleHelpButtonCallback = require("./utils/help");  
+const messageMonitor = require("../lib/messageMonitor");
   
 const bot = new Telegraf(global.TELEGRAM_BOT_TOKEN);  
 const ownerIds = global.TELEGRAM_OWNER.map(id => id.toString());  
@@ -111,6 +112,15 @@ bot.on("callback_query", async (ctx) => {
       }
     }
 
+    // Gestion des boutons de monitoring
+    if (data.startsWith("MONITOR_")) {
+      const monitorCommand = getAllCommands().find(c => c.name === "monitor");
+      if (monitorCommand && typeof monitorCommand.handleCallback === "function") {
+        await monitorCommand.handleCallback(ctx);
+        return await ctx.answerCbQuery();
+      }
+    }
+
     return await ctx.answerCbQuery("❔ Bouton non reconnu.", { show_alert: true });  
   
   } catch (error) {  
@@ -141,6 +151,11 @@ bot.launch()
   .then(() => {
     console.log("✅ Bot Telegram lancé avec succès");
     console.log(`📱 Bot Telegram @${bot.botInfo?.username || 'inconnu'} est maintenant en ligne`);
+    
+    // Initialiser le monitoring si pas déjà fait
+    if (!global.monitor) {
+      messageMonitor.initialize();
+    }
   })
   .catch(err => console.error("❌ Erreur lancement bot :", err));  
   

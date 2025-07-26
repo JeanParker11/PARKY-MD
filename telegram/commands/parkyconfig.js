@@ -94,7 +94,7 @@ async function showParkyConfig(ctx, botId) {
   message += `🤖 **Bot :** ${config.botname}\n`;
   message += `📊 **Statut :** ${status}\n`;
   message += `👤 **Propriétaire :** ${config.ownerJid.split('@')[0]}\n`;
-  message += `🎨 **Créateur :** Jean Parker 🐼\n\n`;
+  message += `🎨 **Créateur :** ${config.creatorName || global.ownername}\n\n`;
 
   // Paramètres IA actuels
   message += `⚙️ **Paramètres IA :**\n`;
@@ -104,9 +104,11 @@ async function showParkyConfig(ctx, botId) {
     message += `${emoji} **${key}** - ${description}\n`;
   }
 
-  // Personnalité actuelle
-  const personality = config.parkyPersonality || 'amical';
-  message += `\n🎭 **Personnalité actuelle :** ${getPersonalityEmoji(personality)} ${personality}\n`;
+  // Configuration PARKY
+  message += `\n🤖 **Configuration PARKY :**\n`;
+  message += `• Nom : ${config.parkyName || 'PARKY'}\n`;
+  message += `• Pack stickers : ${config.stickerPackName}\n`;
+  message += `• Auteur stickers : ${config.stickerAuthor}\n`;
 
   // Statistiques d'utilisation IA
   const aiStats = getAIUsageStats(botId);
@@ -125,7 +127,7 @@ async function showParkyConfig(ctx, botId) {
       { text: config.ai.MAINTENANCE ? "❌ Désactiver Maintenance" : "✅ Activer Maintenance", callback_data: `PARKY_TOGGLE_${botId}_MAINTENANCE` }
     ],
     [
-      { text: "🎭 Personnalité", callback_data: `PARKY_PERSONALITY_MENU_${botId}` },
+      { text: "🏷️ Changer nom PARKY", callback_data: `PARKY_NAME_${botId}` },
       { text: "🎨 Personnalisation", callback_data: `PARKY_CUSTOM_${botId}` }
     ],
     [

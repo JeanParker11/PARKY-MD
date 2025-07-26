@@ -45,7 +45,9 @@ module.exports = {
         // Vérifier si l'utilisateur a déjà un bot connecté
         const userId = ctx.from.id.toString();
         const userJid = `${userId}@s.whatsapp.net`;
-        const userExistingBot = botManager.getAllBots().find(bot => bot.config.ownerJid === userJid);
+        const userExistingBot = botManager.getAllBots().find(bot => 
+            bot.config && bot.config.ownerJid === userJid
+        );
         
         if (userExistingBot) {
             return ctx.reply(
@@ -54,6 +56,7 @@ module.exports = {
                 { parse_mode: "Markdown" }
             );
         }
+        
         await startSession(number, ctx);
     }
 };

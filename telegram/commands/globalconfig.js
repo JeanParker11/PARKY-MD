@@ -111,6 +111,8 @@ module.exports = {
           await handleGlobalAIToggle(ctx, data);
         } else if (data.startsWith('GLOBAL_CMD_')) {
           await handleGlobalCommandToggle(ctx, data);
+        } else if (data.startsWith('GLOBAL_MAINTENANCE_')) {
+          await handleGlobalMaintenance(ctx, data);
         }
         break;
     }
@@ -135,6 +137,9 @@ async function showGlobalAIConfig(ctx) {
     ],
     [
       { text: "🔧 Mode Maintenance (Tous)", callback_data: "GLOBAL_AI_MAINTENANCE_TOGGLE" }
+    ],
+    [
+      { text: "🚨 MAINTENANCE GLOBALE", callback_data: "GLOBAL_MAINTENANCE_TOGGLE" }
     ],
     [
       { text: "🔙 Retour", callback_data: "GLOBAL_BACK" }
@@ -227,4 +232,71 @@ async function cleanupInactiveBots(ctx) {
     `🧹 *Nettoyage terminé*\n\n` +
     `${inactiveBots.length} bot(s) inactif(s) supprimé(s).`
   );
+}
+
+async function handleGlobalAIToggle(ctx, data) {
+  const parts = data.split('_');
+  const setting = parts[2]; // PARKYAI, TRANSLATOR, etc.
+  const action = parts[3]; // ON ou OFF
+  
+  const value = action === 'ON';
+  const updates = {
+    ai: {}
+  };
+  updates.ai[setting] = value;
+  
+  const updatedCount = botManager.applyGlobalUpdate(updates, ctx.from.id.toString());
+  
+  await ctx.answerCbQuery(`${setting} ${value ? 'activé' : 'désactivé'} sur ${updatedCount} bot(s)`);
+  await showGlobalAIConfig(ctx);
+}
+
+async function handleGlobalCommandToggle(ctx, data) {
+  const parts = data.split('_');
+  const category = parts[2]; // JEUX, UNIROLIST, etc.
+  const action = parts[3]; // ON ou OFF
+  
+  const value = action === 'ON';
+  const updates = {
+    commands: {
+      categories: {}
+    }
+  };
+  updates.commands.categories[category] = value;
+  
+  const updatedCount = botManager.applyGlobalUpdate(updates, ctx.from.id.toString());
+  
+  await ctx.answerCbQuery(`Catégorie ${category} ${value ? 'activée' : 'désactivée'} sur ${updatedCount} bot(s)`);
+  await showGlobalCommandConfig(ctx);
+}
+
+async function handleGlobalMaintenance(ctx, data) {
+  // Activer/désactiver la maintenance sur tous les bots
+  const currentState = global.parametres?.MAINTENANCE || false;
+  const newState = !currentState;
+  
+  // Mettre à jour le paramètre global
+  if (!global.parametres) global.parametres = {};
+  global.parametres.MAINTENANCE = newState;
+  
+  // Sauvegarder dans le fichier
+  const fs = require('fs');
+  const path = require('path');
+  const paramPath = path.join(__dirname, '../../data/parametres.json');
+  fs.writeFileSync(paramPath, JSON.stringify(global.parametres, null, 2));
+  
+  // Appliquer à tous les bots
+  const updates = {
+    ai: {
+      MAINTENANCE: newState
+    }
+  };
+  const updatedCount = botManager.applyGlobalUpdate(updates, ctx.from.id.toString());
+  
+  await ctx.answerCbQuery(
+    `Maintenance ${newState ? 'ACTIVÉE' : 'DÉSACTIVÉE'} sur ${updatedCount} bot(s)`,
+    { show_alert: true }
+  );
+  
+  await showGlobalAIConfig(ctx);
 }

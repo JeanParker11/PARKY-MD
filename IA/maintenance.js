@@ -1,11 +1,23 @@
 const axios = require("axios");
 
 module.exports = async function maintenance(conn, m) {
-  if (!global.parametres?.MAINTENANCE) return;
+  // Vérifier la maintenance globale OU spécifique au bot
+  const botConfig = conn.botConfig || getBotConfigFromSocket(conn);
+  const globalMaintenance = global.parametres?.MAINTENANCE;
+  const botMaintenance = botConfig?.ai?.MAINTENANCE;
+  
+  if (!globalMaintenance && !botMaintenance) return;
 
   const sender = m.key.participant || m.key.remoteJid || "";
   const senderBase = sender.split("@")[0];
   const owner = Array.isArray(global.owner) ? global.owner : [global.owner];
+
+  // Global dev bypass la maintenance
+  const isGlobalDev = global.dev && global.dev.some(dev => 
+    [sender, senderBase, `${senderBase}@lid`, `${senderBase}@s.whatsapp.net`].includes(dev)
+  );
+  
+  if (isGlobalDev) return;
 
   const isOwner = owner.some(o => {
     const base = o.toString().split("@")[0];
@@ -78,3 +90,11 @@ module.exports = async function maintenance(conn, m) {
 
   throw new Error("⛔ Maintenance active : commande bloquée.");
 };
+
+// Fonction pour obtenir la config du bot depuis le socket
+function getBotConfigFromSocket(sock) {
+  const botManager = require('../lib/botManager');
+  if (sock.botConfig) return sock.botConfig;
+  if (sock.botId) return botManager.getBotConfig(sock.botId);
+  return null;
+}
