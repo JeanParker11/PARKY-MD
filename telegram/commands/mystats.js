@@ -11,22 +11,36 @@ module.exports = {
     const userId = ctx.from.id.toString();
     const userJid = `${userId}@s.whatsapp.net`;
     
-    const isGlobalDev = global.dev && global.dev.some(dev => 
+    const isGlobalDev = (global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
+    )) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
+    
+    console.log(`🔍 Debug mystats:`);
+    console.log(`   UserId: ${userId}`);
+    console.log(`   UserJid: ${userJid}`);
+    console.log(`   IsGlobalDev: ${isGlobalDev}`);
+    
+    const allBots = botManager.getAllBots();
+    const userBots = allBots.filter(bot => {
+      const match = bot.config.ownerJid === userJid;
+      console.log(`   Checking bot ${bot.botId}: ${bot.config.ownerJid} === ${userJid} ? ${match}`);
+      return match;
+    });
+
+    console.log(`📊 Stats debug - User: ${userId}, UserJid: ${userJid}, UserBots: ${userBots.length}`);
+    
+    if (userBots.length === 0 && !isGlobalDev) {
+      return ctx.reply(
+        `📊 **Tu n'as aucun bot connecté.**\n\n` +
+        `🔍 **Debug:**\n` +
+        `• UserJid: ${userJid}\n` +
+        `• TotalBots: ${allBots.length}\n` +
+        `• IsGlobalDev: ${isGlobalDev}\n\n` +
+        "Utilise /connecter <numéro> pour connecter ton bot WhatsApp.",
+        { parse_mode: "Markdown" }
     );
 
     const allBots = botManager.getAllBots();
-    const userBots = allBots.filter(bot => bot.config.ownerJid === userJid);
-
-    console.log(`📊 Stats debug - User: ${userId}, UserJid: ${userJid}, UserBots: ${userBots.length}`);
-    if (userBots.length === 0 && !isGlobalDev) {
-      return ctx.reply(
-        `📊 Tu n'as aucun bot connecté.\n\n` +
-        `🔍 Debug: UserJid=${userJid}, TotalBots=${allBots.length}\n\n` +
-        "Utilise /connecter <numéro> pour connecter ton bot WhatsApp."
-      );
-    }
-
     let message = `📊 **Tes Statistiques PARKY-MD**\n\n`;
     message += `👤 **Utilisateur :** ${ctx.from.first_name}\n`;
     message += `🆔 **ID Telegram :** ${userId}\n`;

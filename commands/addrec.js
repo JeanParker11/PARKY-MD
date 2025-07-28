@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
+const sharedData = require("../lib/sharedData");
 
-const rewardsPath = path.join(__dirname, "..", "data", "recompense.json");
 
 module.exports = {
   name: "addreward",
@@ -25,20 +25,12 @@ module.exports = {
       return riza.sendMessage(m.chat, { text: `❌ Tous les champs doivent être remplis.` }, { quoted: m });
     }
 
-    let rewards = [];
-    if (fs.existsSync(rewardsPath)) {
-      try {
-        rewards = JSON.parse(fs.readFileSync(rewardsPath));
-        if (!Array.isArray(rewards)) rewards = [];
-      } catch {
-        rewards = [];
-      }
+    const success = sharedData.addSharedReward({ service, email, password });
+
+    if (success) {
+      await riza.sendMessage(m.chat, { text: `✅ Récompense partagée ajoutée pour le service ${service}.` }, { quoted: m });
+    } else {
+      await riza.sendMessage(m.chat, { text: `❌ Erreur lors de l'ajout de la récompense.` }, { quoted: m });
     }
-
-    rewards.push({ service, email, password });
-
-    fs.writeFileSync(rewardsPath, JSON.stringify(rewards, null, 2));
-
-    await riza.sendMessage(m.chat, { text: `✅ Récompense ajoutée pour le service ${service}.` }, { quoted: m });
   },
 };

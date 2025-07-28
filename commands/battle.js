@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const userDataManager = require("../lib/userDataManager");
 const botManager = require("../lib/botManager");
+const sharedData = require("../lib/sharedData");
 
 
 const waitingBattles = new Map();
@@ -186,7 +187,7 @@ module.exports = {
 
 async function sendReward(riza, winnerJid, groupJid, botId) {
   const scoresData = userDataManager.getBotBattles(botId);
-  const rewards = userDataManager.getBotRewards(botId);
+  const rewards = sharedData.getSharedRewards();
 
   const victories = scoresData[winnerJid]?.victories || 0;
 
@@ -222,7 +223,7 @@ Amuse-toi bien sur *${reward.service}* !`;
     console.log(`[Battle] Récompense envoyée à ${winnerJid} pour ${victories} victoires.`);
 
     // Supprimer la récompense utilisée et sauvegarder
-    userDataManager.removeBotReward(botId, rewardIndex);
+    sharedData.removeSharedReward(rewardIndex);
 
     return true;
   }
