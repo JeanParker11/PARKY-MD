@@ -51,7 +51,8 @@ module.exports = {
           `• Total bots: ${allBots.length}\n` +
           `• IsGlobalDev: ${isGlobalDev}`,
         { parse_mode: "Markdown" }
-    ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
+          ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
+    }
 
     const allBots = botManager.getAllBots();
     let message = `🤖 **Bots ${isGlobalDev ? 'Connectés' : 'Tes Bots'}** (${visibleBots.length})\n\n`;

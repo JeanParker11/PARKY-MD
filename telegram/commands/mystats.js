@@ -38,7 +38,8 @@ module.exports = {
         `• IsGlobalDev: ${isGlobalDev}\n\n` +
         "Utilise /connecter <numéro> pour connecter ton bot WhatsApp.",
         { parse_mode: "Markdown" }
-    );
+          );
+    }
 
     const allBots = botManager.getAllBots();
     let message = `📊 **Tes Statistiques PARKY-MD**\n\n`;
