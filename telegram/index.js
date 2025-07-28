@@ -169,11 +169,6 @@ bot.on("callback_query", async (ctx) => {
 
     console.log(`❓ Bouton non géré: ${data}`);
     return await ctx.answerCbQuery("❔ Bouton non reconnu.", { show_alert: true });
-        return await ctx.answerCbQuery();
-      }
-    }
-
-    return await ctx.answerCbQuery("❔ Bouton non reconnu.", { show_alert: true });  
   
   } catch (error) {  
     console.error("❌ Erreur callback bouton :", error);  
