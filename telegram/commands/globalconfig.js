@@ -59,7 +59,6 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     const userId = ctx.from.id.toString();
-    const userJid = `${userId}@s.whatsapp.net`;
 
     // Vérifier que ce callback nous concerne
     if (!data.startsWith('GLOBAL_')) {
@@ -67,9 +66,7 @@ module.exports = {
     }
 
     // Vérifier les permissions dev
-    const isGlobalDev = global.dev && global.dev.some(dev => 
-      [userJid, userId, `${userId}@lid`].includes(dev)
-    );
+    const isGlobalDev = global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId));
 
     if (!isGlobalDev) {
       await ctx.answerCbQuery("⛔ Accès refusé", { show_alert: true });

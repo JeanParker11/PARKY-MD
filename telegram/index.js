@@ -116,7 +116,59 @@ bot.on("callback_query", async (ctx) => {
     if (data.startsWith("MONITOR_")) {
       const monitorCommand = getAllCommands().find(c => c.name === "monitor");
       if (monitorCommand && typeof monitorCommand.handleCallback === "function") {
-        await monitorCommand.handleCallback(ctx);
+        const handled = await monitorCommand.handleCallback(ctx);
+        if (handled) {
+          return await ctx.answerCbQuery();
+        }
+      }
+    }
+
+    // Gestion des boutons de configuration AI
+    if (data.startsWith("CONFIG_AI_") || data.startsWith("CONFIG_CMD_") || data.startsWith("CONFIG_SETTINGS_")) {
+      const configCommand = getAllCommands().find(c => c.name === "configbot");
+      if (configCommand && typeof configCommand.handleCallback === "function") {
+        const handled = await configCommand.handleCallback(ctx);
+        if (handled) {
+          return await ctx.answerCbQuery();
+        }
+      }
+    }
+
+    // Gestion des boutons PARKY
+    if (data.startsWith("PARKY_TOGGLE_") || data.startsWith("PARKY_NAME_") || data.startsWith("PARKY_CUSTOM_")) {
+      const parkyCommand = getAllCommands().find(c => c.name === "parkyconfig");
+      if (parkyCommand && typeof parkyCommand.handleCallback === "function") {
+        const handled = await parkyCommand.handleCallback(ctx);
+        if (handled) {
+          return await ctx.answerCbQuery();
+        }
+      }
+    }
+
+    // Gestion des boutons de maintenance globale
+    if (data.startsWith("GLOBAL_AI_") || data.startsWith("GLOBAL_CMD_") || data.startsWith("GLOBAL_MAINTENANCE_")) {
+      const globalCommand = getAllCommands().find(c => c.name === "globalconfig");
+      if (globalCommand && typeof globalCommand.handleCallback === "function") {
+        const handled = await globalCommand.handleCallback(ctx);
+        if (handled) {
+          return await ctx.answerCbQuery();
+        }
+      }
+    }
+
+    // Gestion des boutons de toggle AI/CMD
+    if (data.startsWith("TOGGLE_AI_") || data.startsWith("TOGGLE_CMD_")) {
+      const configCommand = getAllCommands().find(c => c.name === "configbot");
+      if (configCommand && typeof configCommand.handleCallback === "function") {
+        const handled = await configCommand.handleCallback(ctx);
+        if (handled) {
+          return await ctx.answerCbQuery();
+        }
+      }
+    }
+
+    console.log(`❓ Bouton non géré: ${data}`);
+    return await ctx.answerCbQuery("❔ Bouton non reconnu.", { show_alert: true });
         return await ctx.answerCbQuery();
       }
     }

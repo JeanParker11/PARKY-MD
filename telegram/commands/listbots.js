@@ -13,7 +13,7 @@ module.exports = {
     // Vérifier si global dev
     const isGlobalDev = global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
-    );
+    ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
 
     const allBots = botManager.getAllBots();
     

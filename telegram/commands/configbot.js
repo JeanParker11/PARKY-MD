@@ -55,18 +55,59 @@ module.exports = {
     
     if (data.startsWith('CONFIG_BOT_')) {
       const botId = data.replace('CONFIG_BOT_', '');
+      
+      // Vérifier les permissions
+      const userId = ctx.from.id.toString();
+      const userJid = `${userId}@s.whatsapp.net`;
+      const isGlobalDev = global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId));
+      
+      const bot = botManager.getBot(botId);
+      if (!bot && !isGlobalDev) {
+        await ctx.answerCbQuery("❌ Bot introuvable", { show_alert: true });
+        return true;
+      }
+      
+      if (!isGlobalDev && bot.config.ownerJid !== userJid) {
+        await ctx.answerCbQuery("⛔ Tu ne peux configurer que ton propre bot", { show_alert: true });
+        return true;
+      }
+      
       await showBotConfig(ctx, botId);
       return true;
     }
 
-    if (data.startsWith('TOGGLE_')) {
-      const [, botId, category, setting] = data.split('_');
-      await toggleSetting(ctx, botId, category, setting);
+    if (data.startsWith('CONFIG_AI_')) {
+      const botId = data.replace('CONFIG_AI_', '');
+      await showAIConfig(ctx, botId);
+      return true;
+    }
+
+    if (data.startsWith('CONFIG_CMD_')) {
+      const botId = data.replace('CONFIG_CMD_', '');
+      await showCommandConfig(ctx, botId);
+      return true;
+    }
+
+    if (data.startsWith('TOGGLE_AI_')) {
+      const parts = data.split('_');
+      const botId = parts[2];
+      const setting = parts[3];
+      await toggleAISetting(ctx, botId, setting);
+      return true;
+    }
+
+    if (data.startsWith('TOGGLE_CMD_')) {
+      const parts = data.split('_');
+      const botId = parts[2];
+      const category = parts[3];
+      await toggleCommandCategory(ctx, botId, category);
       return true;
     }
 
     if (data.startsWith('EDIT_')) {
-      const [, botId, field] = data.split('_');
+      const parts = data.split('_');
+      const botId = parts[1];
+      const field = parts[2];
       await editField(ctx, botId, field);
       return true;
     }
@@ -75,10 +116,129 @@ module.exports = {
   }
 };
 
+async function showAIConfig(ctx, botId) {
+  const config = botManager.getBotConfig(botId);
+  if (!config) return;
+
+  let message = `🧠 *Configuration IA - ${config.botname}*\n\n`;
+  
+  for (const [key, value] of Object.entries(config.ai)) {
+    const emoji = value ? "✅" : "❌";
+    const description = getAIDescription(key);
+    message += `${emoji} **${key}** - ${description}\n`;
+  }
+
+  const keyboard = [];
+  for (const [key] of Object.entries(config.ai)) {
+    keyboard.push([{
+      text: `${config.ai[key] ? '❌ Désactiver' : '✅ Activer'} ${key}`,
+      callback_data: `TOGGLE_AI_${botId}_${key}`
+    }]);
+  }
+  
+  keyboard.push([{
+    text: "🔙 Retour",
+    callback_data: `CONFIG_BOT_${botId}`
+  }]);
+
+  await ctx.editMessageText(message, {
+    parse_mode: "Markdown",
+    reply_markup: { inline_keyboard: keyboard }
+  });
+}
+
+async function showCommandConfig(ctx, botId) {
+  const config = botManager.getBotConfig(botId);
+  if (!config) return;
+
+  let message = `🎮 *Catégories de Commandes - ${config.botname}*\n\n`;
+  
+  for (const [key, value] of Object.entries(config.commands.categories)) {
+    const emoji = value ? "✅" : "❌";
+    message += `${emoji} **${key}**\n`;
+  }
+
+  const keyboard = [];
+  for (const [key] of Object.entries(config.commands.categories)) {
+    keyboard.push([{
+      text: `${config.commands.categories[key] ? '❌ Désactiver' : '✅ Activer'} ${key}`,
+      callback_data: `TOGGLE_CMD_${botId}_${key}`
+    }]);
+  }
+  
+  keyboard.push([{
+    text: "🔙 Retour",
+    callback_data: `CONFIG_BOT_${botId}`
+  }]);
+
+  await ctx.editMessageText(message, {
+    parse_mode: "Markdown",
+    reply_markup: { inline_keyboard: keyboard }
+  });
+}
+
+async function toggleAISetting(ctx, botId, setting) {
+  const config = botManager.getBotConfig(botId);
+  if (!config) return;
+
+  const userId = ctx.from.id.toString();
+  const userJid = `${userId}@s.whatsapp.net`;
+
+  // Vérifier les permissions
+  if (!botManager.checkPermission(botId, userJid, 'owner')) {
+    return ctx.answerCbQuery("⛔ Seul le propriétaire peut modifier cette configuration.", { show_alert: true });
+  }
+
+  const updates = {
+    ai: { ...config.ai }
+  };
+  updates.ai[setting] = !config.ai[setting];
+
+  botManager.updateBotConfig(botId, updates, userJid);
+  
+  await ctx.answerCbQuery(`${setting} ${updates.ai[setting] ? 'activé' : 'désactivé'}`);
+  await showAIConfig(ctx, botId);
+}
+
+async function toggleCommandCategory(ctx, botId, category) {
+  const config = botManager.getBotConfig(botId);
+  if (!config) return;
+
+  const userId = ctx.from.id.toString();
+  const userJid = `${userId}@s.whatsapp.net`;
+
+  if (!botManager.checkPermission(botId, userJid, 'owner')) {
+    return ctx.answerCbQuery("⛔ Seul le propriétaire peut modifier cette configuration.", { show_alert: true });
+  }
+
+  const updates = {
+    commands: {
+      categories: { ...config.commands.categories }
+    }
+  };
+  updates.commands.categories[category] = !config.commands.categories[category];
+
+  botManager.updateBotConfig(botId, updates, userJid);
+  
+  await ctx.answerCbQuery(`Catégorie ${category} ${updates.commands.categories[category] ? 'activée' : 'désactivée'}`);
+  await showCommandConfig(ctx, botId);
+}
+
+function getAIDescription(key) {
+  const descriptions = {
+    PARKYAI: "Assistant IA conversationnel",
+    TRANSLATOR: "Traduction automatique des messages",
+    SUGGESTIONS: "Suggestions de commandes",
+    MAINTENANCE: "Mode maintenance du bot"
+  };
+  return descriptions[key] || "Fonctionnalité IA";
+}
 async function showBotConfig(ctx, botId) {
   const config = botManager.getBotConfig(botId);
   if (!config) {
-    return ctx.reply("❌ Configuration introuvable.");
+    return ctx.editMessageText ? 
+      ctx.editMessageText("❌ Configuration introuvable.") :
+      ctx.reply("❌ Configuration introuvable.");
   }
 
   const bot = botManager.getBot(botId);
@@ -104,19 +264,21 @@ async function showBotConfig(ctx, botId) {
 
   const keyboard = [
     [
-      { text: "🧠 IA", callback_data: `CONFIG_AI_${botId}` },
-      { text: "🎮 Commandes", callback_data: `CONFIG_CMD_${botId}` }
+      { text: "🧠 Configuration IA", callback_data: `CONFIG_AI_${botId}` },
+      { text: "🎮 Catégories Commandes", callback_data: `CONFIG_CMD_${botId}` }
     ],
     [
-      { text: "⚙️ Paramètres", callback_data: `CONFIG_SETTINGS_${botId}` },
-      { text: "🎨 Thème", callback_data: `CONFIG_THEME_${botId}` }
+      { text: "⚙️ Paramètres Bot", callback_data: `CONFIG_SETTINGS_${botId}` },
+      { text: "🎨 Personnalisation", callback_data: `CONFIG_THEME_${botId}` }
     ],
     [
-      { text: "👥 Permissions", callback_data: `CONFIG_PERMS_${botId}` }
+      { text: "👥 Permissions", callback_data: `CONFIG_PERMS_${botId}` },
+      { text: "🔄 Actualiser", callback_data: `CONFIG_BOT_${botId}` }
     ]
   ];
 
-  await ctx.reply(message, {
+  const method = ctx.editMessageText || ctx.reply;
+  await method.call(ctx, message, {
     parse_mode: "Markdown",
     reply_markup: { inline_keyboard: keyboard }
   });

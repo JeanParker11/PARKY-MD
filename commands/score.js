@@ -77,6 +77,7 @@ module.exports = {
 };
 // Fonction pour obtenir la config du bot depuis le socket
 function getBotConfigFromSocket(sock) {
+  const botManager = require("../lib/botManager");
   if (sock.botConfig) return sock.botConfig;
   if (sock.botId) return botManager.getBotConfig(sock.botId);
   return null;

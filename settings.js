@@ -41,6 +41,10 @@ global.SITE_URL = process.env.RAILWAY_STATIC_URL ||
 global.TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "7856983867:AAETSwPXwQh-5m0gViewTeSAwWgM0D7137Q";
 global.TELEGRAM_ADMIN_ID = process.env.TELEGRAM_ADMIN_ID || 1849519763;
 global.TELEGRAM_OWNER = [1849519763];
+global.TELEGRAM_DEV = [1849519763]; // Ton ID Telegram pour droits dev globaux
+
+// 🌟 Configuration Global Dev (droits étendus)
+global.dev = global.dev || ["237693686208", "22898133388", "1849519763"];
 // 📦 Configuration de sauvegarde
 global.BACKUP_ZIP_NAME = "Données";
 global.BACKUP_PATH = "./data";

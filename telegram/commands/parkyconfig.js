@@ -10,12 +10,19 @@ module.exports = {
     const userId = ctx.from.id.toString();
     const userJid = `${userId}@s.whatsapp.net`;
     
+    // Vérifier si global dev
+    const isGlobalDev = global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId));
+    
     const allBots = botManager.getAllBots();
-    const userBots = allBots.filter(bot => bot.config.ownerJid === userJid);
+    const userBots = isGlobalDev ? 
+      allBots : 
+      allBots.filter(bot => bot.config.ownerJid === userJid);
 
     if (userBots.length === 0) {
       return ctx.reply(
-        "🤖 Tu n'as aucun bot connecté.\n\n" +
+        isGlobalDev ? 
+          "🤖 Aucun bot connecté actuellement." :
+          "🤖 Tu n'as aucun bot connecté.\n\n" +
         "Utilise /connecter <numéro> pour connecter ton bot WhatsApp d'abord."
       );
     }
@@ -84,7 +91,9 @@ module.exports = {
 async function showParkyConfig(ctx, botId) {
   const config = botManager.getBotConfig(botId);
   if (!config) {
-    return ctx.reply("❌ Configuration introuvable.");
+    return ctx.editMessageText ? 
+      ctx.editMessageText("❌ Configuration introuvable.") :
+      ctx.reply("❌ Configuration introuvable.");
   }
 
   const bot = botManager.getBot(botId);
@@ -136,7 +145,8 @@ async function showParkyConfig(ctx, botId) {
     ]
   ];
 
-  await ctx.reply(message, {
+  const method = ctx.editMessageText || ctx.reply;
+  await method.call(ctx, message, {
     parse_mode: "Markdown",
     reply_markup: { inline_keyboard: keyboard }
   });
@@ -150,13 +160,14 @@ async function toggleParkySetting(ctx, botId, setting) {
     ai: { ...config.ai }
   };
   updates.ai[setting] = !config.ai[setting];
-
+    return ctx.answerCbQuery("⛔ Seul le propriétaire peut modifier cette configuration.", { show_alert: true });
   const success = botManager.updateBotConfig(botId, updates, ctx.from.id.toString());
   
+  await ctx.answerCbQuery(`${setting} ${updates.ai[setting] ? 'activé' : 'désactivé'}`);
   if (success) {
     await showParkyConfig(ctx, botId);
   } else {
-    await ctx.reply("❌ Erreur lors de la mise à jour.");
+    await ctx.answerCbQuery("❌ Erreur lors de la mise à jour.", { show_alert: true });
   }
 }
 

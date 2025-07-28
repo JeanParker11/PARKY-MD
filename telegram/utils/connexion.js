@@ -71,10 +71,49 @@ async function startSession(targetNumber, ctx) {
             auth: state,
             printQRInTerminal: false,
             syncFullHistory: false,
-            markOnlineOnConnect: false
+            markOnlineOnConnect: false,
+            browser: ["Ubuntu", "Chrome", "20.0.04"]
         });
 
         sessions[targetNumber] = sock;
+        
+        // Ajouter les méthodes nécessaires comme le bot principal
+        sock.decodeJid = (jid) => {
+            if (!jid) return jid;
+            if (/:\d+@/gi.test(jid)) {
+                const { jidDecode } = require("@whiskeysockets/baileys");
+                const decode = jidDecode(jid) || {};
+                return decode.user && decode.server ? `${decode.user}@${decode.server}` : jid;
+            }
+            return jid;
+        };
+        
+        sock.sendText = (jid, text, options = {}) =>
+            sock.sendMessage(jid, { text, ...options });
+        
+        // Ajouter downloadMediaMessage comme le bot principal
+        sock.downloadMediaMessage = async (msg) => {
+            try {
+                const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
+                const content = msg?.msg || msg?.message?.[msg?.mtype] || msg?.message;
+                const type = msg?.mtype?.replace(/Message/gi, '') || (content?.mimetype?.split('/')[0]);
+
+                if (!content || !content.mediaKey) {
+                    throw new Error("⛔ Média invalide ou champ mediaKey manquant.");
+                }
+
+                const stream = await downloadContentFromMessage(content, type);
+                const chunks = [];
+                for await (const chunk of stream) chunks.push(chunk);
+                return Buffer.concat(chunks);
+            } catch (e) {
+                throw new Error(`❌ Échec téléchargement : ${e.message}`);
+            }
+        };
+        
+        // Initialiser les objets nécessaires
+        sock.contacts = sock.contacts || {};
+        sock.groupMetadata = sock.groupMetadata || {};
 
         sock.ev.on("creds.update", saveCreds);
 
@@ -113,6 +152,15 @@ async function startSession(targetNumber, ctx) {
                 // Configurer les événements pour ce bot
                 if (global.setupBotEvents) {
                     global.setupBotEvents(sock);
+                }
+                
+                // Envoyer le message de démarrage au propriétaire
+                const getStartupMessage = require('../../lib/startupMessage');
+                try {
+                    await sock.sendMessage(ownerJid, { text: getStartupMessage(config) });
+                    console.log(`📨 Message de démarrage envoyé à ${ownerJid}`);
+                } catch (err) {
+                    console.error(`❌ Erreur envoi message démarrage à ${ownerJid}:`, err.message);
                 }
                 
                 console.log(`🤖 Bot ${targetNumber} enregistré pour l'utilisateur ${ownerJid}`);

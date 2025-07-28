@@ -9,12 +9,11 @@ module.exports = {
 
   async execute(ctx) {
     const userId = ctx.from.id.toString();
-    const userJid = `${userId}@s.whatsapp.net`;
     
     // Vérifier si global dev
     const isGlobalDev = global.dev && global.dev.some(dev => 
-      [userJid, userId, `${userId}@lid`].includes(dev)
-    );
+      [userId, `${userId}@lid`].includes(dev)
+    ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
 
     if (!isGlobalDev) {
       return ctx.reply("⛔ Cette commande est réservée aux développeurs globaux.");
