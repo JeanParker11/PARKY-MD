@@ -11,13 +11,20 @@ module.exports = {
     const userJid = `${userId}@s.whatsapp.net`;
     
     // Vérifier si global dev
-    const isGlobalDev = global.dev && global.dev.some(dev => 
+    const isGlobalDev = (global.dev && global.dev.some(dev => 
       [userJid, userId, `${userId}@lid`].includes(dev)
-    ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
-
+    )) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
+    
+    console.log(`🔍 Debug listbots:`);
+    console.log(`   UserId: ${userId}`);
+    console.log(`   UserJid: ${userJid}`);
+    console.log(`   IsGlobalDev: ${isGlobalDev}`);
+    console.log(`   global.dev: ${JSON.stringify(global.dev)}`);
+    console.log(`   global.TELEGRAM_DEV: ${JSON.stringify(global.TELEGRAM_DEV)}`);
+    
     const allBots = botManager.getAllBots();
     
-    console.log(`🔍 Debug listbots - Utilisateur: ${userId}, Total bots: ${allBots.length}`);
+    console.log(`📊 Total bots: ${allBots.length}`);
     allBots.forEach(bot => {
       console.log(`   Bot: ${bot.botId}, Owner: ${bot.config.ownerJid}, Status: ${bot.sock ? 'online' : 'offline'}`);
     });
@@ -25,18 +32,29 @@ module.exports = {
     // Filtrer les bots selon les permissions
     const visibleBots = isGlobalDev ? 
       allBots : 
-      allBots.filter(bot => bot.config.ownerJid === userJid);
+      allBots.filter(bot => {
+        const match = bot.config.ownerJid === userJid;
+        console.log(`   Checking bot ${bot.botId}: ${bot.config.ownerJid} === ${userJid} ? ${match}`);
+        return match;
+      });
 
     console.log(`🔍 Bots visibles pour ${userId}: ${visibleBots.length}`);
+    
     if (visibleBots.length === 0) {
       return ctx.reply(
         isGlobalDev ? 
-          "📱 Aucun bot connecté actuellement." :
-          `📱 Tu n'as aucun bot connecté.\n\nUtilise /connecter <numéro> pour connecter ton bot.\n\n🔍 Debug: UserJid=${userJid}, TotalBots=${allBots.length}`
-      );
-    }
+          "📱 **Aucun bot connecté actuellement.**\n\nUtilise /connecter <numéro> pour connecter un bot." :
+          `📱 **Tu n'as aucun bot connecté.**\n\n` +
+          `Utilise /connecter <numéro> pour connecter ton bot.\n\n` +
+          `🔍 **Debug:**\n` +
+          `• UserJid: ${userJid}\n` +
+          `• Total bots: ${allBots.length}\n` +
+          `• IsGlobalDev: ${isGlobalDev}`,
+        { parse_mode: "Markdown" }
+    ) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
 
-    let message = `🤖 *Bots ${isGlobalDev ? 'Connectés' : 'Tes Bots'}* (${visibleBots.length})\n\n`;
+    const allBots = botManager.getAllBots();
+    let message = `🤖 **Bots ${isGlobalDev ? 'Connectés' : 'Tes Bots'}** (${visibleBots.length})\n\n`;
 
     visibleBots.forEach((bot, index) => {
       const status = bot.sock ? "🟢 En ligne" : "🔴 Hors ligne";
@@ -44,7 +62,7 @@ module.exports = {
       const timeDiff = Date.now() - lastActivity.getTime();
       const minutesAgo = Math.floor(timeDiff / 60000);
       
-      message += `${index + 1}. *${bot.config.botname}*\n`;
+      message += `${index + 1}. **${bot.config.botname}**\n`;
       message += `   📱 ${bot.botId}\n`;
       message += `   ${status}\n`;
       message += `   🕐 Activité: ${minutesAgo}min\n`;
