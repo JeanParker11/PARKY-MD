@@ -25,6 +25,7 @@ const handleAllIA = require('./IA');
 const { chargerRappels } = require('./commands/rappel');
 const startConnection = require('./lib/connexion'); // Ceci semble être la connexion principale du bot
 const messageMonitor = require('./lib/messageMonitor');
+const botManager = require('./lib/botManager');
 
 // 🔧 Obtenir le nom lisible d’un utilisateur/groupe
 const getDisplayName = async (sock, jid) => {
