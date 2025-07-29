@@ -38,10 +38,9 @@ module.exports = {
         `• IsGlobalDev: ${isGlobalDev}\n\n` +
         "Utilise /connecter <numéro> pour connecter ton bot WhatsApp.",
         { parse_mode: "Markdown" }
-          );
+      );
     }
 
-    const allBots = botManager.getAllBots();
     let message = `📊 **Tes Statistiques PARKY-MD**\n\n`;
     message += `👤 **Utilisateur :** ${ctx.from.first_name}\n`;
     message += `🆔 **ID Telegram :** ${userId}\n`;
@@ -128,7 +127,6 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     
-    // Vérifier que ce callback nous concerne
     if (!data.startsWith('MY_STATS_') && !data.startsWith('MY_BOTS_')) {
       return false;
     }
@@ -180,11 +178,9 @@ function calculateBadges(users, battles, victories, botCount) {
 }
 
 async function showDetailedStats(ctx) {
-  // Implémentation des statistiques détaillées
   await ctx.editMessageText("📊 Statistiques détaillées en cours de développement...");
 }
 
 async function showBotsList(ctx) {
-  // Implémentation de la liste détaillée des bots
   await ctx.editMessageText("🤖 Liste détaillée des bots en cours de développement...");
-}
+  }
