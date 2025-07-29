@@ -59,7 +59,7 @@ function removeSession(number) {
 
 async function startSession(targetNumber, ctx) {
     try {
-        console.log("📲 Démarrage session :", targetNumber);
+        console.log("📲 Démarrage session WhatsApp :", targetNumber);
         if (ctx) await simpleSender(ctx, `🔄 Connexion à WhatsApp pour ${targetNumber}...\n⚠️ Assure-toi que ce numéro n'est pas déjà connecté ailleurs !`);
 
         const sessionPath = `./sessions/${targetNumber}`;
@@ -78,18 +78,18 @@ async function startSession(targetNumber, ctx) {
         sessions[targetNumber] = sock;
         
         // Ajouter les méthodes nécessaires comme le bot principal
-        sock.decodeJid = (jid) => {
-            if (!jid) return jid;
-            if (/:\d+@/gi.test(jid)) {
+        sock.decodeJid = (whatsappJid) => {
+            if (!whatsappJid) return whatsappJid;
+            if (/:\d+@/gi.test(whatsappJid)) {
                 const { jidDecode } = require("@whiskeysockets/baileys");
-                const decode = jidDecode(jid) || {};
-                return decode.user && decode.server ? `${decode.user}@${decode.server}` : jid;
+                const decode = jidDecode(whatsappJid) || {};
+                return decode.user && decode.server ? `${decode.user}@${decode.server}` : whatsappJid;
             }
-            return jid;
+            return whatsappJid;
         };
         
-        sock.sendText = (jid, text, options = {}) =>
-            sock.sendMessage(jid, { text, ...options });
+        sock.sendText = (whatsappJid, text, options = {}) =>
+            sock.sendMessage(whatsappJid, { text, ...options });
         
         // Ajouter downloadMediaMessage comme le bot principal
         sock.downloadMediaMessage = async (msg) => {
@@ -139,19 +139,19 @@ async function startSession(targetNumber, ctx) {
             }
 
             if (connection === "open") {
-                console.log(`✅ Session connectée pour ${targetNumber}`);
+                console.log(`✅ Session WhatsApp connectée pour ${targetNumber}`);
                 
                 // Créer l'ownerJid correct basé sur l'utilisateur Telegram
                 const telegramUserId = ctx ? ctx.from.id.toString() : targetNumber;
-                const ownerJid = `${telegramUserId}@s.whatsapp.net`;
+                const ownerWhatsappJid = `${telegramUserId}@s.whatsapp.net`;
                 
-                console.log(`📝 Association bot ${targetNumber} → utilisateur Telegram ${telegramUserId}`);
+                console.log(`📝 Association botJid ${targetNumber} → utilisateur Telegram ${telegramUserId}`);
                 
-                const config = botManager.registerBot(targetNumber, sock, ownerJid);
+                const config = botManager.registerBot(targetNumber, sock, ownerWhatsappJid);
                 
                 // Appliquer la configuration au socket
                 sock.botConfig = config;
-                sock.botId = targetNumber;
+                sock.botJid = targetNumber;
                 
                 // Ajouter les fonctions nécessaires comme le bot principal
                 sock.decodeJid = (jid) => {
@@ -187,7 +187,7 @@ async function startSession(targetNumber, ctx) {
                 sock.groupMetadata = sock.groupMetadata || {};
                 
                 // Enregistrer dans le monitoring
-                messageMonitor.registerBot(targetNumber, config.botname, ownerJid);
+                messageMonitor.registerBot(targetNumber, config.botname, ownerWhatsappJid);
                 
                 // Configurer les événements pour ce bot
                 if (global.setupBotEvents) {
@@ -197,10 +197,10 @@ async function startSession(targetNumber, ctx) {
                 // Envoyer le message de démarrage au propriétaire
                 const getStartupMessage = require('../../lib/startupMessage');
                 try {
-                    await sock.sendMessage(ownerJid, { text: getStartupMessage(config) });
-                    console.log(`📨 Message de démarrage envoyé à ${ownerJid}`);
+                    await sock.sendMessage(ownerWhatsappJid, { text: getStartupMessage(config) });
+                    console.log(`📨 Message de démarrage envoyé à ${ownerWhatsappJid}`);
                 } catch (err) {
-                    console.error(`❌ Erreur envoi message démarrage à ${ownerJid}:`, err.message);
+                    console.error(`❌ Erreur envoi message démarrage à ${ownerWhatsappJid}:`, err.message);
                 }
                 
                 // Envoyer le message de démarrage
@@ -212,7 +212,7 @@ async function startSession(targetNumber, ctx) {
                     console.error(`❌ Erreur envoi message démarrage:`, err.message);
                 }
                 
-                console.log(`🤖 Bot ${targetNumber} enregistré pour l'utilisateur Telegram ${telegramUserId}`);
+                console.log(`🤖 BotJid ${targetNumber} enregistré pour l'utilisateur Telegram ${telegramUserId}`);
                 
                 if (ctx) await simpleSender(ctx, `✅ ${targetNumber} connecté avec succès à WhatsApp !\n\n🎮 Utilise /listbots pour voir ton bot\n🧠 Utilise /parkyconfig pour configurer PARKY AI`);
             }

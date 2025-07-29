@@ -8,12 +8,12 @@ module.exports = {
 
   async execute(ctx) {
     const userId = ctx.from.id.toString();
-    const userJid = `${userId}@s.whatsapp.net`;
+    const userWhatsappJid = `${userId}@s.whatsapp.net`;
     
     // Vérifier si l'utilisateur a un bot connecté
     const userBots = botManager.getAllBots().filter(bot => 
-      bot.config.ownerJid === userJid || 
-      botManager.checkPermission(bot.botId, userJid, 'owner')
+      bot.config.ownerWhatsappJid === userWhatsappJid || 
+      botManager.checkPermission(bot.botJid, userWhatsappJid, 'owner')
     );
 
     if (userBots.length === 0) {
@@ -26,8 +26,8 @@ module.exports = {
     // Si plusieurs bots, demander lequel configurer
     if (userBots.length > 1) {
       const keyboard = userBots.map(bot => [{
-        text: `🤖 ${bot.config.botname} (${bot.botId})`,
-        callback_data: `CONFIG_BOT_${bot.botId}`
+        text: `🤖 ${bot.config.botname} (${bot.botJid})`,
+        callback_data: `CONFIG_BOT_${bot.botJid}`
       }]);
 
       return ctx.reply(
@@ -41,7 +41,7 @@ module.exports = {
 
     // Un seul bot, afficher sa configuration
     const bot = userBots[0];
-    await showBotConfig(ctx, bot.botId);
+    await showBotConfig(ctx, bot.botJid);
   },
 
   // Gestion des callbacks pour la configuration
@@ -54,61 +54,64 @@ module.exports = {
     }
     
     if (data.startsWith('CONFIG_BOT_')) {
-      const botId = data.replace('CONFIG_BOT_', '');
+      const botJid = data.replace('CONFIG_BOT_', '');
       
       // Vérifier les permissions
       const userId = ctx.from.id.toString();
-      const userJid = `${userId}@s.whatsapp.net`;
-      const isGlobalDev = global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId));
+      const userWhatsappJid = `${userId}@s.whatsapp.net`;
+      const isGlobalDev = (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId))) ||
+                         (global.dev && global.dev.some(dev => 
+                           [userWhatsappJid, userId, `${userId}@lid`].includes(dev)
+                         ));
       
-      const bot = botManager.getBot(botId);
+      const bot = botManager.getBot(botJid);
       if (!bot && !isGlobalDev) {
         await ctx.answerCbQuery("❌ Bot introuvable", { show_alert: true });
         return true;
       }
       
-      if (!isGlobalDev && bot.config.ownerJid !== userJid) {
+      if (!isGlobalDev && bot.config.ownerWhatsappJid !== userWhatsappJid) {
         await ctx.answerCbQuery("⛔ Tu ne peux configurer que ton propre bot", { show_alert: true });
         return true;
       }
       
-      await showBotConfig(ctx, botId);
+      await showBotConfig(ctx, botJid);
       return true;
     }
 
     if (data.startsWith('CONFIG_AI_')) {
-      const botId = data.replace('CONFIG_AI_', '');
-      await showAIConfig(ctx, botId);
+      const botJid = data.replace('CONFIG_AI_', '');
+      await showAIConfig(ctx, botJid);
       return true;
     }
 
     if (data.startsWith('CONFIG_CMD_')) {
-      const botId = data.replace('CONFIG_CMD_', '');
-      await showCommandConfig(ctx, botId);
+      const botJid = data.replace('CONFIG_CMD_', '');
+      await showCommandConfig(ctx, botJid);
       return true;
     }
 
     if (data.startsWith('TOGGLE_AI_')) {
       const parts = data.split('_');
-      const botId = parts[2];
+      const botJid = parts[2];
       const setting = parts[3];
-      await toggleAISetting(ctx, botId, setting);
+      await toggleAISetting(ctx, botJid, setting);
       return true;
     }
 
     if (data.startsWith('TOGGLE_CMD_')) {
       const parts = data.split('_');
-      const botId = parts[2];
+      const botJid = parts[2];
       const category = parts[3];
-      await toggleCommandCategory(ctx, botId, category);
+      await toggleCommandCategory(ctx, botJid, category);
       return true;
     }
 
     if (data.startsWith('EDIT_')) {
       const parts = data.split('_');
-      const botId = parts[1];
+      const botJid = parts[1];
       const field = parts[2];
-      await editField(ctx, botId, field);
+      await editField(ctx, botJid, field);
       return true;
     }
     
@@ -116,8 +119,8 @@ module.exports = {
   }
 };
 
-async function showAIConfig(ctx, botId) {
-  const config = botManager.getBotConfig(botId);
+async function showAIConfig(ctx, botJid) {
+  const config = botManager.getBotConfig(botJid);
   if (!config) return;
 
   let message = `🧠 *Configuration IA - ${config.botname}*\n\n`;
@@ -132,13 +135,13 @@ async function showAIConfig(ctx, botId) {
   for (const [key] of Object.entries(config.ai)) {
     keyboard.push([{
       text: `${config.ai[key] ? '❌ Désactiver' : '✅ Activer'} ${key}`,
-      callback_data: `TOGGLE_AI_${botId}_${key}`
+      callback_data: `TOGGLE_AI_${botJid}_${key}`
     }]);
   }
   
   keyboard.push([{
     text: "🔙 Retour",
-    callback_data: `CONFIG_BOT_${botId}`
+    callback_data: `CONFIG_BOT_${botJid}`
   }]);
 
   await ctx.editMessageText(message, {
@@ -147,8 +150,8 @@ async function showAIConfig(ctx, botId) {
   });
 }
 
-async function showCommandConfig(ctx, botId) {
-  const config = botManager.getBotConfig(botId);
+async function showCommandConfig(ctx, botJid) {
+  const config = botManager.getBotConfig(botJid);
   if (!config) return;
 
   let message = `🎮 *Catégories de Commandes - ${config.botname}*\n\n`;
@@ -162,13 +165,13 @@ async function showCommandConfig(ctx, botId) {
   for (const [key] of Object.entries(config.commands.categories)) {
     keyboard.push([{
       text: `${config.commands.categories[key] ? '❌ Désactiver' : '✅ Activer'} ${key}`,
-      callback_data: `TOGGLE_CMD_${botId}_${key}`
+      callback_data: `TOGGLE_CMD_${botJid}_${key}`
     }]);
   }
   
   keyboard.push([{
     text: "🔙 Retour",
-    callback_data: `CONFIG_BOT_${botId}`
+    callback_data: `CONFIG_BOT_${botJid}`
   }]);
 
   await ctx.editMessageText(message, {
@@ -177,15 +180,15 @@ async function showCommandConfig(ctx, botId) {
   });
 }
 
-async function toggleAISetting(ctx, botId, setting) {
-  const config = botManager.getBotConfig(botId);
+async function toggleAISetting(ctx, botJid, setting) {
+  const config = botManager.getBotConfig(botJid);
   if (!config) return;
 
   const userId = ctx.from.id.toString();
-  const userJid = `${userId}@s.whatsapp.net`;
+  const userWhatsappJid = `${userId}@s.whatsapp.net`;
 
   // Vérifier les permissions
-  if (!botManager.checkPermission(botId, userJid, 'owner')) {
+  if (!botManager.checkPermission(botJid, userWhatsappJid, 'owner')) {
     return ctx.answerCbQuery("⛔ Seul le propriétaire peut modifier cette configuration.", { show_alert: true });
   }
 
@@ -194,20 +197,20 @@ async function toggleAISetting(ctx, botId, setting) {
   };
   updates.ai[setting] = !config.ai[setting];
 
-  botManager.updateBotConfig(botId, updates, userJid);
+  botManager.updateBotConfig(botJid, updates, userWhatsappJid);
   
   await ctx.answerCbQuery(`${setting} ${updates.ai[setting] ? 'activé' : 'désactivé'}`);
-  await showAIConfig(ctx, botId);
+  await showAIConfig(ctx, botJid);
 }
 
-async function toggleCommandCategory(ctx, botId, category) {
-  const config = botManager.getBotConfig(botId);
+async function toggleCommandCategory(ctx, botJid, category) {
+  const config = botManager.getBotConfig(botJid);
   if (!config) return;
 
   const userId = ctx.from.id.toString();
-  const userJid = `${userId}@s.whatsapp.net`;
+  const userWhatsappJid = `${userId}@s.whatsapp.net`;
 
-  if (!botManager.checkPermission(botId, userJid, 'owner')) {
+  if (!botManager.checkPermission(botJid, userWhatsappJid, 'owner')) {
     return ctx.answerCbQuery("⛔ Seul le propriétaire peut modifier cette configuration.", { show_alert: true });
   }
 
@@ -218,10 +221,10 @@ async function toggleCommandCategory(ctx, botId, category) {
   };
   updates.commands.categories[category] = !config.commands.categories[category];
 
-  botManager.updateBotConfig(botId, updates, userJid);
+  botManager.updateBotConfig(botJid, updates, userWhatsappJid);
   
   await ctx.answerCbQuery(`Catégorie ${category} ${updates.commands.categories[category] ? 'activée' : 'désactivée'}`);
-  await showCommandConfig(ctx, botId);
+  await showCommandConfig(ctx, botJid);
 }
 
 function getAIDescription(key) {
@@ -233,19 +236,19 @@ function getAIDescription(key) {
   };
   return descriptions[key] || "Fonctionnalité IA";
 }
-async function showBotConfig(ctx, botId) {
-  const config = botManager.getBotConfig(botId);
+async function showBotConfig(ctx, botJid) {
+  const config = botManager.getBotConfig(botJid);
   if (!config) {
     return ctx.editMessageText ? 
       ctx.editMessageText("❌ Configuration introuvable.") :
       ctx.reply("❌ Configuration introuvable.");
   }
 
-  const bot = botManager.getBot(botId);
+  const bot = botManager.getBot(botJid);
   const status = bot ? "🟢 En ligne" : "🔴 Hors ligne";
 
   let message = `🤖 *Configuration de ${config.botname}*\n\n`;
-  message += `📱 *Numéro :* ${botId}\n`;
+  message += `📱 *Numéro :* ${botJid}\n`;
   message += `📊 *Statut :* ${status}\n`;
   message += `🏷️ *Préfixe :* ${config.prefix}\n`;
   message += `📦 *Version :* ${config.version}\n\n`;
@@ -264,16 +267,16 @@ async function showBotConfig(ctx, botId) {
 
   const keyboard = [
     [
-      { text: "🧠 Configuration IA", callback_data: `CONFIG_AI_${botId}` },
-      { text: "🎮 Catégories Commandes", callback_data: `CONFIG_CMD_${botId}` }
+      { text: "🧠 Configuration IA", callback_data: `CONFIG_AI_${botJid}` },
+      { text: "🎮 Catégories Commandes", callback_data: `CONFIG_CMD_${botJid}` }
     ],
     [
-      { text: "⚙️ Paramètres Bot", callback_data: `CONFIG_SETTINGS_${botId}` },
-      { text: "🎨 Personnalisation", callback_data: `CONFIG_THEME_${botId}` }
+      { text: "⚙️ Paramètres Bot", callback_data: `CONFIG_SETTINGS_${botJid}` },
+      { text: "🎨 Personnalisation", callback_data: `CONFIG_THEME_${botJid}` }
     ],
     [
-      { text: "👥 Permissions", callback_data: `CONFIG_PERMS_${botId}` },
-      { text: "🔄 Actualiser", callback_data: `CONFIG_BOT_${botId}` }
+      { text: "👥 Permissions", callback_data: `CONFIG_PERMS_${botJid}` },
+      { text: "🔄 Actualiser", callback_data: `CONFIG_BOT_${botJid}` }
     ]
   ];
 

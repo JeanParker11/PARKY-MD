@@ -8,16 +8,17 @@ module.exports = {
 
   async execute(ctx) {
     const userId = ctx.from.id.toString();
-    const userJid = `${userId}@s.whatsapp.net`;
+    const userWhatsappJid = `${userId}@s.whatsapp.net`;
     
     // Vérifier si global dev
-    const isGlobalDev = (global.dev && global.dev.some(dev => 
-      [userJid, userId, `${userId}@lid`].includes(dev)
-    )) || (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId)));
+    const isGlobalDev = (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId))) ||
+                       (global.dev && global.dev.some(dev => 
+                         [userWhatsappJid, userId, `${userId}@lid`].includes(dev)
+                       ));
     
     console.log(`🔍 Debug listbots:`);
     console.log(`   UserId: ${userId}`);
-    console.log(`   UserJid: ${userJid}`);
+    console.log(`   UserWhatsappJid: ${userWhatsappJid}`);
     console.log(`   IsGlobalDev: ${isGlobalDev}`);
     console.log(`   global.dev: ${JSON.stringify(global.dev)}`);
     console.log(`   global.TELEGRAM_DEV: ${JSON.stringify(global.TELEGRAM_DEV)}`);
@@ -26,15 +27,15 @@ module.exports = {
     
     console.log(`📊 Total bots: ${allBots.length}`);
     allBots.forEach(bot => {
-      console.log(`   Bot: ${bot.botId}, Owner: ${bot.config.ownerJid}, Status: ${bot.sock ? 'online' : 'offline'}`);
+      console.log(`   BotJid: ${bot.botJid}, Owner: ${bot.config.ownerWhatsappJid}, Status: ${bot.sock ? 'online' : 'offline'}`);
     });
     
     // Filtrer les bots selon les permissions
     const visibleBots = isGlobalDev ? 
       allBots : 
       allBots.filter(bot => {
-        const match = bot.config.ownerJid === userJid;
-        console.log(`   Checking bot ${bot.botId}: ${bot.config.ownerJid} === ${userJid} ? ${match}`);
+        const match = bot.config.ownerWhatsappJid === userWhatsappJid;
+        console.log(`   Checking botJid ${bot.botJid}: ${bot.config.ownerWhatsappJid} === ${userWhatsappJid} ? ${match}`);
         return match;
       });
 
@@ -47,7 +48,7 @@ module.exports = {
           `📱 **Tu n'as aucun bot connecté.**\n\n` +
           `Utilise /connecter <numéro> pour connecter ton bot.\n\n` +
           `🔍 **Debug:**\n` +
-          `• UserJid: ${userJid}\n` +
+          `• UserWhatsappJid: ${userWhatsappJid}\n` +
           `• Total bots: ${allBots.length}\n` +
           `• IsGlobalDev: ${isGlobalDev}`,
         { parse_mode: "Markdown" }
@@ -64,12 +65,12 @@ module.exports = {
       const minutesAgo = Math.floor(timeDiff / 60000);
       
       message += `${index + 1}. **${bot.config.botname}**\n`;
-      message += `   📱 ${bot.botId}\n`;
+      message += `   📱 ${bot.botJid}\n`;
       message += `   ${status}\n`;
       message += `   🕐 Activité: ${minutesAgo}min\n`;
       
       if (isGlobalDev) {
-        message += `   👤 Propriétaire: ${bot.config.ownerJid.split('@')[0]}\n`;
+        message += `   👤 Propriétaire: ${bot.config.ownerWhatsappJid.split('@')[0]}\n`;
       }
       
       message += `   🧠 PARKY AI: ${bot.config.ai.PARKYAI ? '✅' : '❌'}\n\n`;
@@ -81,7 +82,7 @@ module.exports = {
     visibleBots.forEach(bot => {
       keyboard.push([{
         text: `⚙️ ${bot.config.botname}`,
-        callback_data: `CONFIG_BOT_${bot.botId}`
+        callback_data: `CONFIG_BOT_${bot.botJid}`
       }]);
     });
 

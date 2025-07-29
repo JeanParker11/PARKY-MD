@@ -72,14 +72,16 @@ bot.on("callback_query", async (ctx) => {
     }
 
     // Gestion des boutons de configuration bot
-    if (data.startsWith("CONFIG_") || data.startsWith("PARKY_") || data.startsWith("BOTINFO_")) {
+    if (data.startsWith("CONFIG_") || data.startsWith("PARKY_") || data.startsWith("BOTINFO_") || data.startsWith("TOGGLE_")) {
       const configCommands = ["configbot", "parkyconfig", "botinfo"];
       for (const cmdName of configCommands) {
         const command = getAllCommands().find(c => c.name === cmdName);
         if (command && typeof command.handleCallback === "function") {
           try {
-            await command.handleCallback(ctx);
-            return await ctx.answerCbQuery();
+            const handled = await command.handleCallback(ctx);
+            if (handled) {
+              return await ctx.answerCbQuery();
+            }
           } catch (e) {
             console.error(`❌ Erreur callback ${cmdName}:`, e);
           }

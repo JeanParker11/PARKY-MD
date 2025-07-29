@@ -7,7 +7,7 @@ module.exports = {
   allowedForAll: true,
   allowPrivate: true,
 
-  async execute(riza, m, args) {
+  async execute(parky, m, args) {
     const prompt = args.join(" ").trim();
 
     // Gestion du message cité (éphemeral ou pas)
@@ -24,7 +24,7 @@ module.exports = {
     };
 
     if (!prompt) {
-      return riza.sendMessage(m.chat, {
+      return parky.sendMessage(m.chat, {
         text: "🖌️ *Écris une idée à transformer en art !*\n\n📌 Exemple : `.art un château enchanté au clair de lune`"
       }, quotedMsg);
     }
@@ -39,14 +39,14 @@ module.exports = {
 
       const buffer = Buffer.from(response.data, "binary");
 
-      await riza.sendMessage(m.chat, {
+      await parky.sendMessage(m.chat, {
         image: buffer,
         mimetype: "image/jpeg",
         caption: `🧠 *Prompt :*\n「 ${prompt} 」\n\n🎨 *Image générée via PARKY AI*`
       }, quotedMsg);
     } catch (err) {
       console.error("❌ Erreur .art :", err.message);
-      await riza.sendMessage(m.chat, {
+      await parky.sendMessage(m.chat, {
         text: "❌ *Une erreur est survenue lors de la génération de l’image.*\nEssaie un autre prompt."
       }, quotedMsg);
     }
