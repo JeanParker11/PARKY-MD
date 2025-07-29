@@ -1,6 +1,8 @@
 // 🟩 Initialisation
 require('./lib/watcher');
 require('./settings');
+require('./web/server');
+require('./telegram/index');
 
 const fs = require('fs');
 const path = require('path');
