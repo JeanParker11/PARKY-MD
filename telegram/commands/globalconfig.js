@@ -269,18 +269,32 @@ async function handleGlobalCommandToggle(ctx, data) {
 
 async function handleGlobalMaintenance(ctx, data) {
   // Activer/désactiver la maintenance sur tous les bots
-  const currentState = global.parametres?.MAINTENANCE || false;
+  const fs = require('fs');
+  const path = require('path');
+  const paramPath = path.join(__dirname, '../../data/parametres.json');
+  
+  let currentState = false;
+  try {
+    if (fs.existsSync(paramPath)) {
+      const params = JSON.parse(fs.readFileSync(paramPath, 'utf-8'));
+      currentState = params.MAINTENANCE || false;
+    }
+  } catch (e) {
+    console.error('Erreur lecture parametres.json:', e);
+  }
+  
   const newState = !currentState;
   
   // Mettre à jour le paramètre global
   if (!global.parametres) global.parametres = {};
   global.parametres.MAINTENANCE = newState;
   
-  // Sauvegarder dans le fichier
-  const fs = require('fs');
-  const path = require('path');
-  const paramPath = path.join(__dirname, '../../data/parametres.json');
-  fs.writeFileSync(paramPath, JSON.stringify(global.parametres, null, 2));
+  // Sauvegarder dans le fichier global
+  try {
+    fs.writeFileSync(paramPath, JSON.stringify(global.parametres, null, 2));
+  } catch (e) {
+    console.error('Erreur sauvegarde parametres.json:', e);
+  }
   
   // Appliquer à tous les bots
   const updates = {
@@ -291,7 +305,7 @@ async function handleGlobalMaintenance(ctx, data) {
   const updatedCount = botManager.applyGlobalUpdate(updates, ctx.from.id.toString());
   
   await ctx.answerCbQuery(
-    `Maintenance ${newState ? 'ACTIVÉE' : 'DÉSACTIVÉE'} sur ${updatedCount} bot(s)`,
+    `🚨 Maintenance ${newState ? 'ACTIVÉE' : 'DÉSACTIVÉE'} sur ${updatedCount} bot(s) + global`,
     { show_alert: true }
   );
   

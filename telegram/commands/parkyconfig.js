@@ -51,39 +51,31 @@ module.exports = {
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
     const userId = ctx.from.id.toString();
-    const userJid = `${userId}@s.whatsapp.net`;
 
     // Vérifier que ce callback nous concerne
     if (!data.startsWith('PARKY_')) {
       return false;
     }
+    
+    console.log(`🧠 ParkyConfig callback: ${data} par ${userId}`);
 
     if (data.startsWith('PARKY_CONFIG_')) {
       const botId = data.replace('PARKY_CONFIG_', '');
-      
-      // Vérifier les permissions
-      const bot = botManager.getBot(botId);
-      if (!bot || bot.config.ownerJid !== userJid) {
-        await ctx.answerCbQuery("⛔ Tu ne peux configurer que tes propres bots", { show_alert: true });
-        return true;
-      }
-
       await showParkyConfig(ctx, botId);
       return true;
     }
 
     if (data.startsWith('PARKY_TOGGLE_')) {
-      const [, botId, setting] = data.split('_').slice(2);
-      await toggleParkySetting(ctx, botId, setting);
+      const parts = data.split('_');
+      if (parts.length >= 4) {
+        const botJid = parts[2];
+        const setting = parts[3];
+        console.log(`🧠 Toggle PARKY: ${setting} pour bot ${botJid}`);
+        await toggleParkySetting(ctx, botJid, setting);
       return true;
+      }
     }
 
-    if (data.startsWith('PARKY_PERSONALITY_')) {
-      const [, botId, personality] = data.split('_').slice(2);
-      await setParkyPersonality(ctx, botId, personality);
-      return true;
-    }
-    
     return false;
   }
 };

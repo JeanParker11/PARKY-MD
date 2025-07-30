@@ -39,13 +39,7 @@ module.exports = {
     // Filtrer les bots selon les permissions
     const visibleBots = isGlobalDev
       ? allBots
-      : allBots.filter((bot) => {
-          const match = bot.config.ownerWhatsappJid === userWhatsappJid;
-          console.log(
-            `   Checking botJid ${bot.botJid}: ${bot.config.ownerWhatsappJid} === ${userWhatsappJid} ? ${match}`
-          );
-          return match;
-        });
+      : allBots.filter((bot) => bot.config.telegramUserId === userId);
 
     console.log(`🔍 Bots visibles pour ${userId}: ${visibleBots.length}`);
 

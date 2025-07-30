@@ -47,34 +47,17 @@ module.exports = {
   // Gestion des callbacks pour la configuration
   async handleCallback(ctx) {
     const data = ctx.callbackQuery.data;
+    const userId = ctx.from.id.toString();
     
     // Vérifier que ce callback nous concerne
-    if (!data.startsWith('CONFIG_BOT_') && !data.startsWith('TOGGLE_') && !data.startsWith('EDIT_')) {
+    if (!data.startsWith('CONFIG_') && !data.startsWith('TOGGLE_')) {
       return false;
     }
     
+    console.log(`🔧 ConfigBot callback: ${data} par ${userId}`);
+    
     if (data.startsWith('CONFIG_BOT_')) {
       const botJid = data.replace('CONFIG_BOT_', '');
-      
-      // Vérifier les permissions
-      const userId = ctx.from.id.toString();
-      const userWhatsappJid = `${userId}@s.whatsapp.net`;
-      const isGlobalDev = (global.TELEGRAM_DEV && global.TELEGRAM_DEV.includes(parseInt(userId))) ||
-                         (global.dev && global.dev.some(dev => 
-                           [userWhatsappJid, userId, `${userId}@lid`].includes(dev)
-                         ));
-      
-      const bot = botManager.getBot(botJid);
-      if (!bot && !isGlobalDev) {
-        await ctx.answerCbQuery("❌ Bot introuvable", { show_alert: true });
-        return true;
-      }
-      
-      if (!isGlobalDev && bot.config.ownerWhatsappJid !== userWhatsappJid) {
-        await ctx.answerCbQuery("⛔ Tu ne peux configurer que ton propre bot", { show_alert: true });
-        return true;
-      }
-      
       await showBotConfig(ctx, botJid);
       return true;
     }
@@ -93,26 +76,24 @@ module.exports = {
 
     if (data.startsWith('TOGGLE_AI_')) {
       const parts = data.split('_');
-      const botJid = parts[2];
-      const setting = parts[3];
+      if (parts.length >= 4) {
+        const botJid = parts[2];
+        const setting = parts[3];
+        console.log(`🔧 Toggle AI: ${setting} pour bot ${botJid}`);
       await toggleAISetting(ctx, botJid, setting);
       return true;
+      }
     }
 
     if (data.startsWith('TOGGLE_CMD_')) {
       const parts = data.split('_');
-      const botJid = parts[2];
-      const category = parts[3];
+      if (parts.length >= 4) {
+        const botJid = parts[2];
+        const category = parts[3];
+        console.log(`🔧 Toggle CMD: ${category} pour bot ${botJid}`);
       await toggleCommandCategory(ctx, botJid, category);
       return true;
-    }
-
-    if (data.startsWith('EDIT_')) {
-      const parts = data.split('_');
-      const botJid = parts[1];
-      const field = parts[2];
-      await editField(ctx, botJid, field);
-      return true;
+      }
     }
     
     return false;

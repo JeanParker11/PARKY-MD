@@ -31,7 +31,7 @@ module.exports = {
     
     // Trouver le bot de l'utilisateur
     const userBot = allBots.find(bot => 
-      bot.config && bot.config.ownerWhatsappJid === userWhatsappJid
+      bot.config && bot.config.telegramUserId === userId
     );
     
     if (!userBot && !isGlobalDev) {
