@@ -5,7 +5,6 @@ const chalk = require('chalk');
 // 📌 Infos globales
 global.owner = ["237693686208", "15483994640452@lid"];
 global.sudo = ["22898133388"];
-global.dev = ["237693686208", "22898133388"]; // Global dev - droits sur tous les bots
 global.ownername = '𝙹𝚎𝚊𝚗 𝙿𝚊𝚛𝚔𝚎𝚛 🐼';
 global.botname = '𝙿𝙰𝚁𝙺𝚈-𝙼𝙳';
 global.botversion = '1.0.0';
@@ -18,41 +17,41 @@ global.menuNewsletterName = "🩵‣ᴘᴀʀᴋʏ-ᴍᴅ";
 global.menuChannelLink = "https://whatsapp.com/channel/0029VbB8HEnGZNCkf0BPG01o";
 global.imgthumb = "https://i.postimg.cc/RhH1M73G/uwp4820695.jpg";
 global.menuGroupLink = "https://whatsapp.com/channel/0029VbB8HEnGZNCkf0BPG01o";
-global.QUETE_GROUP_JID = "120363366068015316@g.us"; // ← remplace par le jid réel de ton groupe
+global.QUETE_GROUP_JID = "120363366068015316@g.us";
 
-// 🤖 Configuration Gemini AI avec nouvelle bibliothèque @google/genai
+// 🤖 Configuration Gemini AI
 global.GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAu4uwnPGgT_f3zkqJ5B4Lk-zU8ErToRW8";
-global.GEMINI_MODEL = "gemini-2.0-flash-exp"; // Modèle le plus récent et performant
-global.GEMINI_LIBRARY = "@google/genai"; // Nouvelle bibliothèque recommandée
+global.GEMINI_MODEL = "gemini-2.0-flash-exp";
+global.GEMINI_LIBRARY = "@google/genai";
 
 // 🌐 Configuration du site web
 global.WEB_PORT = process.env.PORT || 3000;
 global.WEB_HOST = process.env.HOST || "0.0.0.0";
 global.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "parker";
 
-// 🔗 URLs du site (automatiquement détectées selon l'environnement)
-global.SITE_URL = process.env.RAILWAY_STATIC_URL || 
-                  process.env.RENDER_EXTERNAL_URL ||
-                  (process.env.HEROKU_APP_NAME ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` : null) ||
-                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                  `http://localhost:${global.WEB_PORT}`;
+global.SITE_URL = process.env.RAILWAY_STATIC_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  (process.env.HEROKU_APP_NAME ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` : null) ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${global.WEB_PORT}`);
 
-// 📱 Configuration Telegram
+// 📱 Telegram config
 global.TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "7856983867:AAETSwPXwQh-5m0gViewTeSAwWgM0D7137Q";
 global.TELEGRAM_ADMIN_ID = process.env.TELEGRAM_ADMIN_ID || 1849519763;
 global.TELEGRAM_OWNER = [1849519763];
-global.TELEGRAM_DEV = [1849519763]; // Ton ID Telegram pour droits dev globaux
+global.TELEGRAM_DEV = [1849519763];
 
-// 🌟 Configuration Global Dev (droits étendus)
-global.dev = global.dev || ["237693686208", "22898133388", "1849519763"];
-// 📦 Configuration de sauvegarde
+// 🌟 Devs globaux unifiés
+global.WA_DEV = ["237693686208", "22898133388"];
+global.dev = [...global.WA_DEV, ...global.TELEGRAM_DEV.map(id => id.toString())];
+
+// 📦 Sauvegarde
 global.BACKUP_ZIP_NAME = "Données";
 global.BACKUP_PATH = "./data";
 
-// 🌐 Configuration NGROK
-global.ngrokToken = '2zHnvO0SzojvgL0L27jq0owgikV_2BCdZD3a1Zvwo7a7QMSjb'; // Ton token NGROK
-global.portNgrok = 3000; // Le port sur lequel tu veux exposer (ex: 3000 ou 5000)
-global.regionNgrok = 'us'; // Région : 'us', 'eu', 'ap', etc.
+// 🌐 Ngrok
+global.ngrokToken = '2zHnvO0SzojvgL0L27jq0owgikV_2BCdZD3a1Zvwo7a7QMSjb';
+global.portNgrok = 3000;
+global.regionNgrok = 'us';
 
 module.exports = {
   ngrokToken: global.ngrokToken,
@@ -60,37 +59,35 @@ module.exports = {
   regionNgrok: global.regionNgrok
 };
 
-// 🔐 Configuration de sécurité
+// 🔐 Sécurité
 global.SESSION_SECRET = process.env.SESSION_SECRET || "parky-md-secret-key-2024";
 global.JWT_SECRET = process.env.JWT_SECRET || "parky-jwt-secret-2024";
 
-// 🎮 Configuration des quiz
-global.QUIZ_TIME_LIMIT = 30; // secondes
+// 🎮 Quiz
+global.QUIZ_TIME_LIMIT = 30;
 global.QUIZ_POINTS_CORRECT = 10;
 global.QUIZ_POINTS_WRONG = 0;
 
-// 📊 Configuration des limites
+// 📊 Limites
 global.MAX_QUESTIONS_PER_SUBMISSION = 10;
-global.MAX_QUIZ_LENGTH = 500; // caractères
-global.MAX_OPTION_LENGTH = 100; // caractères
+global.MAX_QUIZ_LENGTH = 500;
+global.MAX_OPTION_LENGTH = 100;
 
-// 🎨 Configuration de l'interface
+// 🎨 UI
 global.THEME_COLOR = "#6366f1";
 global.SUCCESS_COLOR = "#10b981";
 global.ERROR_COLOR = "#ef4444";
 global.WARNING_COLOR = "#f59e0b";
 
-// 📁 Chemins
+// 📁 Dossiers
 const dataFolder = path.join(__dirname, "data");
 const paramPath = path.join(dataFolder, "parametres.json");
 const iaFolder = path.join(__dirname, "IA");
 
-// 📦 S'assurer que le dossier ./data existe
 if (!fs.existsSync(dataFolder)) {
   fs.mkdirSync(dataFolder, { recursive: true });
 }
 
-// 🔄 Fonction de chargement
 function loadParams() {
   try {
     if (fs.existsSync(paramPath)) {
@@ -102,7 +99,6 @@ function loadParams() {
   return {};
 }
 
-// 💾 Fonction de sauvegarde
 function saveParams(params) {
   try {
     fs.writeFileSync(paramPath, JSON.stringify(params, null, 2));
@@ -111,7 +107,6 @@ function saveParams(params) {
   }
 }
 
-// 🔍 Détection automatique des IA
 let iaFunctions = [];
 try {
   iaFunctions = fs.readdirSync(iaFolder)
@@ -121,28 +116,25 @@ try {
   console.error(chalk.red("❌ Erreur lecture dossier IA :"), e.message);
 }
 
-// ⚙️ Synchronisation des paramètres
 let existingParams = loadParams();
 let updated = false;
 
 for (const ia of iaFunctions) {
   if (!Object.prototype.hasOwnProperty.call(existingParams, ia)) {
-    existingParams[ia] = true; // Par défaut activé
+    existingParams[ia] = true;
     updated = true;
   }
 }
 
 if (updated) saveParams(existingParams);
-
 global.parametres = existingParams;
 
-// 🔁 Surveillance du fichier paramètres
 fs.watchFile(paramPath, () => {
   console.log(chalk.yellow("🔄 parametres.json modifié, rechargement..."));
   global.parametres = loadParams();
 });
 
-// 📊 Affichage de la configuration au démarrage
+// 📊 Démarrage
 console.log(chalk.cyan("🔧 Configuration PARKY-MD chargée:"));
 console.log(chalk.green(`   📱 Bot: ${global.botname} v${global.botversion}`));
 console.log(chalk.green(`   👤 Créateur: ${global.ownername}`));
@@ -157,7 +149,7 @@ if (global.GEMINI_API_KEY === 'AIzaSyDipWRFerNNmOy_bcKjWKjjgKjjJgKjjgK') {
   console.log(chalk.yellow("📚 Nouvelle bibliothèque: npm install @google/genai"));
 }
 
-// 🔁 Surveillance de ce fichier
+// 🔁 Hot reload
 const file = require.resolve(__filename);
 fs.watchFile(file, () => {
   fs.unwatchFile(file);
@@ -167,7 +159,6 @@ fs.watchFile(file, () => {
 });
 
 module.exports = {
-  // Export des configurations pour utilisation dans d'autres modules
   gemini: {
     apiKey: global.GEMINI_API_KEY,
     model: global.GEMINI_MODEL,
